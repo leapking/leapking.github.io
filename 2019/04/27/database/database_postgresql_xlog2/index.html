@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="LeapKing&#39;s Home">
 <meta property="og:description" content="PostgreSQL流复制二——物理流复制同步策略">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-04-27T15:35:08.808Z">
+<meta property="og:updated_time" content="2019-04-27T15:37:59.400Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="PostgreSQL流复制二——物理流复制同步策略">
 <meta name="twitter:description" content="PostgreSQL流复制二——物理流复制同步策略">
@@ -421,7 +421,38 @@
 
       
         <h2 id="物理流复制同步策略"><a href="#物理流复制同步策略" class="headerlink" title="物理流复制同步策略"></a>物理流复制同步策略</h2><p>根据WAL日志从被接收到被应用的不同阶段，可以设定不同的同步策略。配置文件中的 <code>synchromous_commit</code> 用于设置主备之间事物同步策略。</p>
-<p>synchromous_commit合法参数及含义：<br>参数值|代码中实际值<br>—–|———-<br>off,false,no,0|SYNCHRONOUS_COMMIT_OFF<br>local|SYNCHRONOUS_COMMIT_LOCAL_FLUSH<br>remote_write|SYNCHRONOUS_COMMIT_REMOTE_WRITE<br>on,true,yes,1|SYNCHRONOUS_COMMIT_REMOTE_FLUSH<br>remote_apply|SYNCHRONOUS_COMMIT_REMOTE_APPLY<br>默认值是SYNCHRONOUS_COMMIT_REMOTE_FLUSH。</p>
+<p>synchromous_commit合法参数及含义：</p>
+<table>
+<thead>
+<tr>
+<th>参数值</th>
+<th>代码中实际值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>off,false,no,0</td>
+<td>SYNCHRONOUS_COMMIT_OFF</td>
+</tr>
+<tr>
+<td>local</td>
+<td>SYNCHRONOUS_COMMIT_LOCAL_FLUSH</td>
+</tr>
+<tr>
+<td>remote_write</td>
+<td>SYNCHRONOUS_COMMIT_REMOTE_WRITE</td>
+</tr>
+<tr>
+<td>on,true,yes,1</td>
+<td>SYNCHRONOUS_COMMIT_REMOTE_FLUSH</td>
+</tr>
+<tr>
+<td>remote_apply</td>
+<td>SYNCHRONOUS_COMMIT_REMOTE_APPLY</td>
+</tr>
+</tbody>
+</table>
+<p>默认值是SYNCHRONOUS_COMMIT_REMOTE_FLUSH。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span></span><br><span class="line">&#123;</span><br><span class="line">  SYNCHRONOUS_COMMIT_OFF,          <span class="comment">/* 事物异步提交，不强制WAL刷盘 */</span></span><br><span class="line">  SYNCHRONOUS_COMMIT_LOCAL_FLUSH,  <span class="comment">/* 主机WAL刷盘不等待任何备机 */</span></span><br><span class="line">  SYNCHRONOUS_COMMIT_REMOTE_WRITE, <span class="comment">/* 主机WAL刷盘且所有备机收到 */</span></span><br><span class="line">  SYNCHRONOUS_COMMIT_REMOTE_FLUSH, <span class="comment">/* 主机WAL刷盘且所有备机也刷盘 */</span></span><br><span class="line">  SYNCHRONOUS_COMMIT_REMOTE_APPLY  <span class="comment">/* 主机WAL刷盘且所有备机已经apply */</span></span><br><span class="line">&#125; SyncCommitLevel;</span><br></pre></td></tr></table></figure>
 <p>前两个值表示主节点本地事物提交策略，不需要等待备节点的提交状态。<br>后三个值表示主备之间WAL同步传输时的三个级别，默认需要等备机刷盘。<br>最后一个表示开始主备同步模式，其它意味着是异步模式。</p>
 <p>事物异步提交时，未等WAL刷盘就向应用返回提交成功。这样做提高了一定的性能，但异常宕机时会有部分已提交事物的WAL日志丢失，系统恢复时做未提交事物处理。</p>
