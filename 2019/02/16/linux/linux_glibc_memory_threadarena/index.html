@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux,glibc," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="glibc ptmalloc内存管理介绍">
+<meta name="keywords" content="linux,glibc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="glibc ptmalloc内存管理">
+<meta property="og:url" content="https://leapking.github.io/2019/02/16/linux/linux_glibc_memory_threadarena/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="glibc ptmalloc内存管理介绍">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="glibc ptmalloc内存管理">
+<meta name="twitter:description" content="glibc ptmalloc内存管理介绍">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2019/02/16/linux/linux_glibc_memory_threadarena/"/>
+
+
+
+
+
+  <title>glibc ptmalloc内存管理 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2019/02/16/linux/linux_glibc_memory_threadarena/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">glibc ptmalloc内存管理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-16T21:05:40+08:00">
+                2019-02-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  glibc ptmalloc内存管理介绍
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Linux-glibc多线程内存管理"><a href="#Linux-glibc多线程内存管理" class="headerlink" title="Linux glibc多线程内存管理"></a>Linux glibc多线程内存管理</h1><p><a href="https://blog.csdn.net/maokelong95/article/details/51989081" target="_blank" rel="noopener">https://blog.csdn.net/maokelong95/article/details/51989081</a><br><a href="https://blog.csdn.net/sim120/article/details/39373229" target="_blank" rel="noopener">https://blog.csdn.net/sim120/article/details/39373229</a><br><a href="https://blog.csdn.net/maokelong95/article/details/52006379" target="_blank" rel="noopener">https://blog.csdn.net/maokelong95/article/details/52006379</a><br><a href="https://www.xuebuyuan.com/2223733.html" target="_blank" rel="noopener">https://www.xuebuyuan.com/2223733.html</a><br><a href="https://mqzhuang.iteye.com/blog/1014260" target="_blank" rel="noopener">https://mqzhuang.iteye.com/blog/1014260</a><br><a href="https://mqzhuang.iteye.com/blog/1014291" target="_blank" rel="noopener">https://mqzhuang.iteye.com/blog/1014291</a></p>
+<h2 id="用户态内存管理"><a href="#用户态内存管理" class="headerlink" title="用户态内存管理"></a>用户态内存管理</h2><p>在Linux中每个用户程序都运行在虚拟的内存空间中，操作系统内核并没有提供对虚拟内存空间的管理接口，其借助于第三方的开源实现。</p>
+<p>开源社区公开了很多现成的虚拟内存分配器（Virtual Memory Allocators，以下简称为分配器）：<br>    dlmalloc – 第一个被广泛使用的通用动态内存分配器；<br>    ptmalloc2 – glibc 内置分配器的原型；<br>    jemalloc – FreeBSD ＆ Firefox 所用分配器；<br>    tcmalloc – Google 贡献的分配器；<br>    libumem – Solaris 所用分配器；</p>
+<p>Linux的早期版本采用dlmalloc作为它的默认分配器，dlmalloc不支持线程安全的多线程调用。在dlmalloc中，当两个线程同时malloc时，只有一个线程能够访问临界区（critical section）——这是因为所有线程共享用以缓存已释放内存的「空闲列表数据结构」（freelist data structure），所以使用dlmalloc的多线程应用会在malloc上耗费过多时间，从而导致整个应用性能的下降。</p>
+<p>基于dlmalloc开发的ptmalloc2引入了多线程支持，Linux就转而采用了ptmalloc2。多线程支持可以提升分配器的性能，进而间接提升应用的性能。<br>在ptmalloc2中，当两个线程同时调用malloc时，内存均会得以立即分配——每个线程都维护着单独的堆，各个堆被独立的空闲列表数据结构管理，因此各个线程可以并发地从各自的空闲列表数据结构中申请内存。这种为每个线程维护独立堆与空闲列表数据结构的行为就「per thread arena」。</p>
+<p>glibc源码: <a href="http://www.gnu.org/software/libc/libc.html" target="_blank" rel="noopener">http://www.gnu.org/software/libc/libc.html</a></p>
+<p>glibc手册: <a href="http://www.gnu.org/software/libc/manual/html_node/index.html" target="_blank" rel="noopener">http://www.gnu.org/software/libc/manual/html_node/index.html</a></p>
+<h2 id="多线程内存分配介绍"><a href="#多线程内存分配介绍" class="headerlink" title="多线程内存分配介绍"></a>多线程内存分配介绍</h2><p>「栈」指代用于分配静态内存的虚拟地址空间，在程序内存的「Stack」中通过汇编栈指令动态调整。</p>
+<p>「堆」指代用于分配动态内存的虚拟地址空间，Glibc里通过brk系统调用调整「Heap」段大小(小于128KB的内存申请)以及通过mmap系统调用申请「Memory Mapping Segment」(超过128KB的内存申请)；</p>
+<p>下面通过程序，演示Heap段的变化</p>
+<h3 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Per thread arena example. */</span></span><br><span class="line"><span class="comment">//https://blog.csdn.net/maokelong95/article/details/51989081</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;pthread.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">threadFunc</span><span class="params">(<span class="keyword">void</span>* arg)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[6/11]ChildThread: Before malloc\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">char</span>* addr = (<span class="keyword">char</span>*) <span class="built_in">malloc</span>(<span class="number">1000</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[7/11]ChildThread: After malloc(1000) and before free\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(addr);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[8/11]ChildThread: After free(1000)\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    addr = (<span class="keyword">char</span>*) <span class="built_in">malloc</span>(<span class="number">500</span>*<span class="number">1024</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[9/11]ChildThread: After malloc(500*1024) and before free\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(addr);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[10/11]ChildThread: After free(500*1024)\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">pthread_t</span> t1;</span><br><span class="line">    <span class="keyword">void</span>* s;</span><br><span class="line">    <span class="keyword">int</span> ret;</span><br><span class="line">    <span class="keyword">char</span>* addr;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"Welcome to per thread arena example::%d\n"</span>, getpid());</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[1/11]MainThread: Before malloc\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    addr = (<span class="keyword">char</span>*) <span class="built_in">malloc</span>(<span class="number">1000</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[2/11]MainThread: After malloc(1000) and before free\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(addr);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[3/11]MainThread: After free(1000)\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    addr = (<span class="keyword">char</span>*) <span class="built_in">malloc</span>(<span class="number">500</span>*<span class="number">1024</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[4/11]MainThread: After malloc(500*1024) and before free\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">free</span>(addr);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[5/11]MainThread: After free(500*1024)\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line">    </span><br><span class="line">    ret = pthread_create(&amp;t1, <span class="literal">NULL</span>, threadFunc, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">if</span>(ret)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Thread creation error\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    ret = pthread_join(t1, &amp;s);</span><br><span class="line">    <span class="keyword">if</span>(ret)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"Thread join error\n"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"[11/11]After child thread exit\n"</span>);</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="逐步分析"><a href="#逐步分析" class="headerlink" title="逐步分析"></a>逐步分析</h3><p>-bash-3.2$ uname -a<br>Linux server 2.6.18-128.7 x86_64 GNU/Linux<br>-bash-3.2$ ld –version<br>GNU ld version 2.17.50.0.6 20061020</p>
+<h4 id="1-主线程分配内存之前"><a href="#1-主线程分配内存之前" class="headerlink" title="1. 主线程分配内存之前"></a>1. 主线程分配内存之前</h4><p>只有用于静态内存分配的stack，没有用于动态内存分配的heap</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ cat 1.out </span><br><span class="line">00400000-00401000 r-xp 00000000 fd:01 17762435                           /home/user1/a.out</span><br><span class="line">00600000-00601000 rw-p 00000000 fd:01 17762435                           /home/user1/a.out</span><br><span class="line">3084400000-3084416000 r-xp 00000000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084416000-3084615000 ---p 00016000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084615000-3084616000 r--p 00015000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084616000-3084617000 rw-p 00016000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084617000-308461b000 rw-p 3084617000 00:00 0 </span><br><span class="line">3362600000-336261c000 r-xp 00000000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">336281b000-336281c000 r--p 0001b000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">336281c000-336281d000 rw-p 0001c000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">3362a00000-3362b4c000 r-xp 00000000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362b4c000-3362d4c000 ---p 0014c000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d4c000-3362d50000 r--p 0014c000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d50000-3362d51000 rw-p 00150000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d51000-3362d56000 rw-p 3362d51000 00:00 0 </span><br><span class="line">2b8c0c41c000-2b8c0c41f000 rw-p 2b8c0c41c000 00:00 0 </span><br><span class="line">2b8c0c44a000-2b8c0c44d000 rw-p 2b8c0c44a000 00:00 0 </span><br><span class="line">7fff61a12000-7fff61a27000 rw-p 7ffffffea000 00:00 0                      [stack]</span><br><span class="line">ffffffffff600000-ffffffffffe00000 ---p 00000000 00:00 0                  [vdso]</span><br></pre></td></tr></table></figure>
+<h4 id="2-主线程分配1KB内存之后"><a href="#2-主线程分配1KB内存之后" class="headerlink" title="2. 主线程分配1KB内存之后"></a>2. 主线程分配1KB内存之后</h4><p>从如下的输出结果中我们可以看到，新增了主线程的heap段，并且其地址区间正好在数据段（0x09662000 - 0x09683000）上面，这表明堆内存是移动「Program Break」的位置产生的（也即通过 brk 中断）。Heap段位于低地址，map段位于高地址。</p>
+<p>此外，请注意，尽管用户只申请了 1000 字节的内存，但是实际产生了 132KB 的堆。这个连续的堆区域被称为「arena」。因为这个 arena 是被主线程建立的，因此其被称为「main arena」。接下来的申请会继续分配这个 arena 的 132KB 中剩余的部分。当分配完毕时，它可以通过继续移动 Program Break 的位置扩容。扩容后，「top chunk」的大小也随之调整，以将这块新增的空间圈进去；相应地，arena 也可以在 top chunk 过大时缩小。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ cat 2.out </span><br><span class="line">00400000-00401000 r-xp 00000000 fd:01 17762435                           /home/user1/a.out</span><br><span class="line">00600000-00601000 rw-p 00000000 fd:01 17762435                           /home/user1/a.out</span><br><span class="line">09662000-09683000 rw-p 09662000 00:00 0                                  [heap]</span><br><span class="line">3084400000-3084416000 r-xp 00000000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084416000-3084615000 ---p 00016000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084615000-3084616000 r--p 00015000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084616000-3084617000 rw-p 00016000 fd:00 1407705                        /lib64/libpthread-2.5.so</span><br><span class="line">3084617000-308461b000 rw-p 3084617000 00:00 0 </span><br><span class="line">3362600000-336261c000 r-xp 00000000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">336281b000-336281c000 r--p 0001b000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">336281c000-336281d000 rw-p 0001c000 fd:00 1409988                        /lib64/ld-2.5.so</span><br><span class="line">3362a00000-3362b4c000 r-xp 00000000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362b4c000-3362d4c000 ---p 0014c000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d4c000-3362d50000 r--p 0014c000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d50000-3362d51000 rw-p 00150000 fd:00 1407652                        /lib64/libc-2.5.so</span><br><span class="line">3362d51000-3362d56000 rw-p 3362d51000 00:00 0 </span><br><span class="line">2b8c0c41c000-2b8c0c41f000 rw-p 2b8c0c41c000 00:00 0 </span><br><span class="line">2b8c0c44a000-2b8c0c44d000 rw-p 2b8c0c44a000 00:00 0 </span><br><span class="line">7fff61a12000-7fff61a27000 rw-p 7ffffffea000 00:00 0                      [stack]</span><br><span class="line">ffffffffff600000-ffffffffffe00000 ---p 00000000 00:00 0                  [vdso]</span><br></pre></td></tr></table></figure>
+<h4 id="3-主线程释放1KB内存之后，没有变化"><a href="#3-主线程释放1KB内存之后，没有变化" class="headerlink" title="3. 主线程释放1KB内存之后，没有变化"></a>3. 主线程释放1KB内存之后，没有变化</h4><p>当分配的内存区域 free 掉时，其并不会立即归还给操作系统，而仅仅是移交给了作为库函数的分配器。这块 free 掉的内存添加在了「main arenas bin」中（在 glibc malloc 中，空闲列表数据结构被称为「bin」）。随后当用户请求内存时，分配器就不再向内核申请新堆了，而是先试着各个「bin」中查找空闲内存。只有当 bin 中不存在空闲内存时，分配器才会继续向内核申请内存。当Heap段很大且brk指针位置存在连续的空闲空间时，会进行内存紧缩，使Heap段变小。</p>
+<h4 id="4-主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB"><a href="#4-主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB" class="headerlink" title="4. 主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB"></a>4. 主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ diff 3.out 4.out </span><br><span class="line">18c18</span><br><span class="line">&lt; 2b8c0c44a000-2b8c0c44d000 rw-p 2b8c0c44a000 00:00 0 </span><br><span class="line">---</span><br><span class="line"><span class="meta">&gt;</span> 2b8c0c44a000-2b8c0c4cb000 rw-p 2b8c0c44a000 00:00 0</span><br></pre></td></tr></table></figure>
+<h4 id="5-主线程释放大内存之后，大内存-gt-128KB-立即归还给操作系统"><a href="#5-主线程释放大内存之后，大内存-gt-128KB-立即归还给操作系统" class="headerlink" title="5. 主线程释放大内存之后，大内存(&gt;=128KB)立即归还给操作系统"></a>5. 主线程释放大内存之后，大内存(&gt;=128KB)立即归还给操作系统</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ diff 4.out 5.out </span><br><span class="line">18c18</span><br><span class="line">&lt; 2b8c0c44a000-2b8c0c4cb000 rw-p 2b8c0c44a000 00:00 0 </span><br><span class="line">---</span><br><span class="line"><span class="meta">&gt;</span> 2b8c0c44a000-2b8c0c44d000 rw-p 2b8c0c44a000 00:00 0</span><br></pre></td></tr></table></figure>
+<h4 id="6-子线程创建后，申请内存之前，新增了子线程的Heap段"><a href="#6-子线程创建后，申请内存之前，新增了子线程的Heap段" class="headerlink" title="6. 子线程创建后，申请内存之前，新增了子线程的Heap段"></a>6. 子线程创建后，申请内存之前，新增了子线程的Heap段</h4><p>主线程和子线程的maps结果完全一样</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ diff 5.out 6.out </span><br><span class="line">3a4,5</span><br><span class="line"><span class="meta">&gt;</span> 40d34000-40d35000 ---p 40d34000 00:00 0 </span><br><span class="line"><span class="meta">&gt;</span> 40d35000-41735000 rw-p 40d35000 00:00 0</span><br></pre></td></tr></table></figure>
+<h4 id="7-子线程创建后，申请内存之后，没什么变化"><a href="#7-子线程创建后，申请内存之后，没什么变化" class="headerlink" title="7. 子线程创建后，申请内存之后，没什么变化"></a>7. 子线程创建后，申请内存之后，没什么变化</h4><h4 id="8-子线程创建后，释放内存之后，没什么变化"><a href="#8-子线程创建后，释放内存之后，没什么变化" class="headerlink" title="8. 子线程创建后，释放内存之后，没什么变化"></a>8. 子线程创建后，释放内存之后，没什么变化</h4><h4 id="9-子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB"><a href="#9-子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB" class="headerlink" title="9. 子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB"></a>9. 子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-bash-3.2$ diff 8.out 9.out </span><br><span class="line">3c3</span><br><span class="line">&lt; 09662000-09683000 rw-p 09662000 00:00 0                                  [heap]</span><br><span class="line">---</span><br><span class="line"><span class="meta">&gt;</span> 09662000-09700000 rw-p 09662000 00:00 0                                  [heap]</span><br></pre></td></tr></table></figure>
+<h4 id="10-子线程释放大内存之后"><a href="#10-子线程释放大内存之后" class="headerlink" title="10. 子线程释放大内存之后"></a>10. 子线程释放大内存之后</h4><h4 id="11-子线程退出后，没什么变化"><a href="#11-子线程退出后，没什么变化" class="headerlink" title="11. 子线程退出后，没什么变化"></a>11. 子线程退出后，没什么变化</h4>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2019/02/16/linux/linux_glibc_memory_threadarena/" title="glibc ptmalloc内存管理">https://leapking.github.io/2019/02/16/linux/linux_glibc_memory_threadarena/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          
+            <a href="/tags/glibc/" rel="tag"><i class="fa fa-tag"></i> glibc</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/10/research_note/" rel="next" title="学习笔记">
+                <i class="fa fa-chevron-left"></i> 学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/23/database/database_postgresql_mmgr/" rel="prev" title="PostgreSQL内存管理">
+                PostgreSQL内存管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux-glibc多线程内存管理"><span class="nav-number">1.</span> <span class="nav-text">Linux glibc多线程内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#用户态内存管理"><span class="nav-number">1.1.</span> <span class="nav-text">用户态内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多线程内存分配介绍"><span class="nav-number">1.2.</span> <span class="nav-text">多线程内存分配介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示例代码"><span class="nav-number">1.2.1.</span> <span class="nav-text">示例代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#逐步分析"><span class="nav-number">1.2.2.</span> <span class="nav-text">逐步分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-主线程分配内存之前"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">1. 主线程分配内存之前</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-主线程分配1KB内存之后"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">2. 主线程分配1KB内存之后</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-主线程释放1KB内存之后，没有变化"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">3. 主线程释放1KB内存之后，没有变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">4. 主线程申请大内存之后，mmap映射区发生了变化0x9b8000到0xa36000，增加了504KB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-主线程释放大内存之后，大内存-gt-128KB-立即归还给操作系统"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">5. 主线程释放大内存之后，大内存(&gt;=128KB)立即归还给操作系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-子线程创建后，申请内存之前，新增了子线程的Heap段"><span class="nav-number">1.2.2.6.</span> <span class="nav-text">6. 子线程创建后，申请内存之前，新增了子线程的Heap段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-子线程创建后，申请内存之后，没什么变化"><span class="nav-number">1.2.2.7.</span> <span class="nav-text">7. 子线程创建后，申请内存之后，没什么变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-子线程创建后，释放内存之后，没什么变化"><span class="nav-number">1.2.2.8.</span> <span class="nav-text">8. 子线程创建后，释放内存之后，没什么变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB"><span class="nav-number">1.2.2.9.</span> <span class="nav-text">9. 子线程申请大内存之后，主线程的Heap段发生了变化，0x04010000到0x0408d000增加了512KB</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-子线程释放大内存之后"><span class="nav-number">1.2.2.10.</span> <span class="nav-text">10. 子线程释放大内存之后</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-子线程退出后，没什么变化"><span class="nav-number">1.2.2.11.</span> <span class="nav-text">11. 子线程退出后，没什么变化</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

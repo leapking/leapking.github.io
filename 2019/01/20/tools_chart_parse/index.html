@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="parse," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="线图法解析句子成分">
+<meta name="keywords" content="parse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线图法解析句子成分">
+<meta property="og:url" content="https://leapking.github.io/2019/01/20/tools_chart_parse/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="线图法解析句子成分">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.058Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线图法解析句子成分">
+<meta name="twitter:description" content="线图法解析句子成分">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2019/01/20/tools_chart_parse/"/>
+
+
+
+
+
+  <title>线图法解析句子成分 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2019/01/20/tools_chart_parse/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">线图法解析句子成分</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-01-20T20:46:08+08:00">
+                2019-01-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/tools/" itemprop="url" rel="index">
+                    <span itemprop="name">tools</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  线图法解析句子成分
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="线图法整体流程"><a href="#线图法整体流程" class="headerlink" title="线图法整体流程"></a>线图法整体流程</h1><pre><code>1. 从Agenda弹出元素，如果Agenda为空，则找下一个位置上的词，形成X(i,j)放入到Agenda中，然后对X(i,j)匹配所有的规则，形成点规则，加入到ActiveArc中，并扩展弧。
+2. 扩展弧操作即将X(i,j)加入到Chart中，然后，检查活动边集上位置为(k,i)的点规则，进行合并，
+3. 将合并出的点规则加入到ActiveArc中，并将(k,j)加入到Agenda表中，然后从Agenda中弹出元素，匹配规则，加入到Archive，然后在扩展弧，这样不断循环。
+</code></pre><h2 id="在《自然语言理解》中对该算法也给了比较明确的说明："><a href="#在《自然语言理解》中对该算法也给了比较明确的说明：" class="headerlink" title="在《自然语言理解》中对该算法也给了比较明确的说明："></a>在《自然语言理解》中对该算法也给了比较明确的说明：</h2><pre><code>一、边扩展算法
+    添加一个从位置p1到位置p2的成分C：
+    1、将C加入到chart的位置p1和位置p2之间；
+    2、将任意一条形式为X-&gt;X1...•C...Xn的活动边，如果该活动边在位置p0和p1之间，则在位置p0和p1之间添加一条活动边X-&gt;X1...C•...Xn；
+    3、对任意一条形式为X-&gt;X1...Xn•C的活动边，如果该活动边在位置p0和p1之间，则在位置待处理列表中添加一个新的成分X，该成分的位置在p0和p2之间；
+二、自底而上的Chart句法分析算法
+    执行下列过程，直到输入为空：
+    1、如果待处理列表为空，在词典中查找下一个输入词语的解释，并将它们都加入到待处理列表中；
+    2、从待处理列表中选择一个成分。（我们假定该成分为C，跨度从位置p1到位置p2）；
+    3、对语法中每一条形式为X-&gt;C X1...Xn的规则，增加一条活动边X-&gt;•C X1...Xn，其跨度为从位置p1到p2；
+    4、采取上述的边扩展算法将C加入到chart中
+</code></pre><h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><pre><code>要分析的句子：The large can can hold the water（大罐子能盛水）
+字典表：
+    the: ART(限定词)
+    large: ADJ(形容词)
+    can: N, AUX(助词), V
+    hold: N, V
+    water: N, V
+语法表：
+    S -&gt; NP VP
+    NP -&gt; ART ADJ N
+    NP -&gt; ART N
+    NP -&gt; ADJ N
+    VP -&gt; AUX VP
+    VP -&gt; V NP
+正确的分析过程应该是（忽略不正确的边）
+    1、找到第一个单词，这是个the，生成成分(constituent)C:((ART)0, 1)，并将其放到待处理列表(agenda)中；
+    2、从agenda中取出成份C，到语法表中找以ART开头的所有语法，生成活动边，加到Chart中。在这个步骤是两条：((•ART ADJ N)0, 1)和((•ART N)0, 1)
+    3、对成分C进行处理，扩展符合条件的活动边
+        将((•ART ADJ N)0, 1)扩展为((ART •ADJ N)0, 1)
+        将((•ART N)0, 1)扩展为((ART •N)0, 1)
+    4、加入成分((ADJ)1, 2)，并将((ART •ADJ N)0, 1)扩展为((ART ADJ •N)0, 2)    （其余的步骤护略不讲）
+    5、加入成分((N)2, 3)，并将((ART ADJ N•)0, 3)，这是个不活动边，由它生成成分((NP)0, 3)，并加入到agenda中
+    6、取出成分((NP)0, 3)，加入新的活动边到chart中：((•NP VP)0, 3)
+    7、处理成分((NP)0, 3)，将((•NP VP)0, 3)扩展为((NP •VP)0, 3)
+    8、加入成分((AUX)3, 4)，并加入新边((•AUX VP)3, 4)，并扩展为((AUX •VP)3, 4)
+    9、加入成分((V)4, 5)，并加入新边((•V NP)4, 5)，并扩展为((V •NP)4, 5)
+    10、加入成分((ART)5, 6)，并加入新边((•ART N)5, 6)，并扩展为((ART •N)5, 6)
+    11、加入成分((N)6, 7)，并将((ART •N)5, 6)扩展为((ART N•)5, 7)，生成新的成分((NP)5, 7)
+    12、处理成分((NP)5, 7)，将((V •NP)4, 5)扩展为((V NP•)4, 7)，生成新的成分((VP)4, 7)
+    13、处理成分((VP)4, 7)，将((AUX •VP)3, 4)扩展为((AUX VP•)3, 7)，生成新的成分((VP)3, 7)
+    14、处理成分((VP)3, 7)，将((NP •VP)0, 3)扩展为((NP VP•)0, 7)，生成新的成分((S)0, 7)
+    15、((S)0, 7)的跨度与整个句子相符，分析结束，生成((S)0, 7)的过程就是整个句子的结构。
+在效率方面，由于本例比较短，所以它比前两个自顶向下的搜索算法都要慢。但随着句子的复杂程度增加，搜索算法会显著得变慢。
+</code></pre><h3 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h3><figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 先写测试：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BottomUpChartParserTest</span> &lt; Test::Unit::<span class="title">TestCase</span></span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">test_the_large_can_can_hold_the_water</span></span></span><br><span class="line">    <span class="comment"># define the sentence to be parsered</span></span><br><span class="line">    sentence = <span class="string">'The large can can hold the water'</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># define the dictionary</span></span><br><span class="line">    dictionary = &#123;</span><br><span class="line">      <span class="string">'the'</span>   =&gt; [<span class="string">'ART'</span>],</span><br><span class="line">      <span class="string">'large'</span> =&gt; [<span class="string">'ADJ'</span>],</span><br><span class="line">      <span class="string">'can'</span>   =&gt; [<span class="string">'N'</span>, <span class="string">'AUX'</span>, <span class="string">'V'</span>],</span><br><span class="line">      <span class="string">'hold'</span>  =&gt; [<span class="string">'N'</span>, <span class="string">'V'</span>],</span><br><span class="line">      <span class="string">'water'</span> =&gt; [<span class="string">'N'</span>, <span class="string">'V'</span>]</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># define the grammars</span></span><br><span class="line">    grammars = &#123;</span><br><span class="line">      <span class="string">'S'</span>   =&gt; [<span class="string">'NP VP'</span>],</span><br><span class="line">      <span class="string">'NP'</span>  =&gt; [<span class="string">'ART ADJ N'</span>, <span class="string">'ART N'</span>, <span class="string">'ADJ N'</span>],</span><br><span class="line">      <span class="string">'VP'</span>  =&gt; [<span class="string">'AUX VP'</span>, <span class="string">'V NP'</span>]</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment"># define the expected result</span></span><br><span class="line">    expected_result = [<span class="string">'ART'</span>, <span class="string">'ADJ'</span>, <span class="string">'N'</span>, <span class="string">'AUX'</span>, <span class="string">'V'</span>, <span class="string">'ART'</span>, <span class="string">'N'</span>]</span><br><span class="line"></span><br><span class="line">    <span class="comment">#创建解析类的对象</span></span><br><span class="line">    parser = NLU::Chapter3::BottomUpChartParser.new(dictionary, grammars)</span><br><span class="line">    <span class="comment">#解析句子</span></span><br><span class="line">    flag = parser.parse(sentence)</span><br><span class="line"></span><br><span class="line">    assert flag <span class="comment">#确认返回的flag为真</span></span><br><span class="line">    assert parser.result.length == <span class="number">1</span> <span class="comment">#确认返回结果的长度为1</span></span><br><span class="line">    assert_equal expected_result, parser.result[<span class="number">0</span>].get_step() <span class="comment">#确认返回结果与期望结果相同</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##定义成分，成分中有一棵树，用来记录整个分析的过程：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Constituent</span></span></span><br><span class="line">    <span class="comment">#定义类的成员</span></span><br><span class="line">    <span class="keyword">attr_accessor</span> <span class="symbol">:start</span>, <span class="symbol">:end</span>, <span class="symbol">:value</span>, <span class="symbol">:root</span> <span class="comment">#attr_accessor标示这些变量是公有可访问的的</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#构造函数，初始化一棵树</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span> <span class="title">start_index</span>, <span class="title">end_index</span>, <span class="title">value</span>, <span class="title">history</span></span></span><br><span class="line">        @start = start_index</span><br><span class="line">        @end = end_index</span><br><span class="line">        @value = value</span><br><span class="line">        @history = history</span><br><span class="line"></span><br><span class="line">        <span class="comment">#构造一个Tree</span></span><br><span class="line">        @root = Tree.new(value,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="symbol">:grammar</span> =&gt; @value,</span><br><span class="line">            <span class="symbol">:start</span> =&gt; @start,</span><br><span class="line">            <span class="symbol">:end</span> =&gt; @end</span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#</span></span><br><span class="line">        <span class="keyword">return</span> @history.each() &#123; <span class="params">|child|</span> @root.add_child(child) &#125;</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#返回树的所有叶子节点</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">get_step</span></span></span><br><span class="line">        <span class="keyword">return</span> @root.get_leaves</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##定义边：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Arc</span></span></span><br><span class="line">    <span class="comment">#定义类的成员</span></span><br><span class="line">    <span class="keyword">attr_reader</span> <span class="symbol">:start</span>, <span class="symbol">:end</span>, <span class="symbol">:applied_grammar</span>, <span class="symbol">:position</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#构造函数</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(start_index, end_index, applied_grammar, parent_grammar, position, history)</span></span></span><br><span class="line">        @start = start_index</span><br><span class="line">        @end = end_index</span><br><span class="line">        @applied_grammar = applied_grammar</span><br><span class="line">        @parent = parent_grammar</span><br><span class="line">        @position = position</span><br><span class="line">        @grammars = applied_grammar.split()</span><br><span class="line">        @history = []</span><br><span class="line">        @history.concat(history)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">is_active?</span></span></span><br><span class="line">        <span class="keyword">return</span> @position &lt; @grammars.length</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">is_next?</span> <span class="title">constituent</span></span></span><br><span class="line">        <span class="keyword">return</span> @grammars[@position] == constituent.value &amp;&amp;</span><br><span class="line">            ((@end == constituent.start &amp;&amp; @position != <span class="number">0</span>) <span class="params">||</span></span><br><span class="line">            (@start == constituent.start &amp;&amp; @end == constituent.<span class="keyword">end</span> &amp;&amp; @position == <span class="number">0</span>))</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">extend_arc</span> <span class="title">constituent</span></span></span><br><span class="line">        raise(ArgumentError, <span class="string">''</span>) <span class="keyword">unless</span> is_next?(constituent)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> Arc.new(@start, constituent.<span class="keyword">end</span>, @applied_grammar, @parent, @position + <span class="number">1</span>, @history + [constituent.root])</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">create_next_consitutent</span></span></span><br><span class="line">        <span class="keyword">return</span> Constituent.new(@start, @end, @parent, @history)</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">to_s</span></span></span><br><span class="line">        desc = <span class="string">'(('</span></span><br><span class="line">        @grammars.each_with_index &#123; <span class="params">|g, index|</span></span><br><span class="line">            desc &lt;&lt; <span class="string">'•'</span> <span class="keyword">if</span> index == @position</span><br><span class="line">            desc &lt;&lt; g &lt;&lt; <span class="string">' '</span></span><br><span class="line">        &#125;</span><br><span class="line">        desc.chop!</span><br><span class="line">        desc &lt;&lt; <span class="string">'•'</span> <span class="keyword">if</span> @position &gt;= @grammars.length</span><br><span class="line">        desc &lt;&lt; <span class="string">')'</span> &lt;&lt; @start.to_s() &lt;&lt; <span class="string">', '</span> &lt;&lt; @end.to_s() &lt;&lt; <span class="string">')'</span></span><br><span class="line">        desc</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="comment">##定义分析器：</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BottomUpChartParser</span></span></span><br><span class="line">    <span class="comment">#定义类的成员</span></span><br><span class="line">    <span class="keyword">attr_reader</span> <span class="symbol">:result</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">#构造函数（字典表，语法表）</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize</span> <span class="title">dictionary</span>, <span class="title">grammars</span></span></span><br><span class="line">        raise(ArgumentError, <span class="string">'The dictionary or grammars can not be nil.'</span>) <span class="keyword">if</span> dictionary.<span class="literal">nil</span>? <span class="params">||</span> grammars.<span class="literal">nil</span>?</span><br><span class="line"></span><br><span class="line">        <span class="comment">#初始化字典和语法表</span></span><br><span class="line">        @dictionary = dictionary</span><br><span class="line">        @grammars = grammars</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 解析句子</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parse</span> <span class="title">sentence</span></span></span><br><span class="line">        raise(ArgumentError, <span class="string">''</span>) <span class="keyword">if</span> sentence.<span class="literal">nil</span>? <span class="params">||</span> sentence.strip().empty?</span><br><span class="line">        @index = <span class="number">0</span></span><br><span class="line">        @agenda = []</span><br><span class="line">        @result = []</span><br><span class="line">        @chart = &#123;&#125;</span><br><span class="line">        @step = <span class="number">0</span></span><br><span class="line">        @words = sentence.downcase().split() <span class="comment">#1.将句子转小写，再切分成一个个的单词</span></span><br><span class="line">        <span class="keyword">while</span> add_word_to_agenda             <span class="comment">#2.将一个单词放到代理表中</span></span><br><span class="line">            handle_agenda                    <span class="comment">#3.处理代理表</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> !@result.empty?</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Look up the interpretations for the next word and add them to the agenda.</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">add_word_to_agenda</span></span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span> <span class="keyword">if</span> @index &gt;= @words.length</span><br><span class="line"></span><br><span class="line">        <span class="comment">#获取当前单词，并检查其是否包含在字典当中</span></span><br><span class="line">        current_word = @words[@index]</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span> <span class="keyword">unless</span> @dictionary.has_key?(current_word)</span><br><span class="line"></span><br><span class="line">        <span class="comment">#遍历当前单词在字典中的值</span></span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> @dictionary[current_word]</span><br><span class="line">            <span class="comment">#将当前单词的起始位置和在字典表中对应的词性，生成成分，并放到待处理表agenda中</span></span><br><span class="line">            @agenda &lt;&lt; Constituent.new(@index, @index + <span class="number">1</span>, item, [])</span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">        @index += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">handle_agenda</span></span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">if</span> @agenda.empty?</span><br><span class="line"></span><br><span class="line">        <span class="comment">#从待处理表中取出各个成分</span></span><br><span class="line">        temp_agenda = [].concat(@agenda)</span><br><span class="line">        @agenda.clear</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> constituent <span class="keyword">in</span> temp_agenda</span><br><span class="line">            p <span class="string">"Step<span class="subst">#&#123;@step&#125;</span> - Input constituent: ((<span class="subst">#&#123;constituent.value&#125;</span>)， <span class="subst">#&#123;constituent.start&#125;</span>, <span class="subst">#&#123;constituent.<span class="keyword">end</span>&#125;</span>)"</span></span><br><span class="line"> </span><br><span class="line">            <span class="comment">#将合法的成分放到result中</span></span><br><span class="line">            @result &lt;&lt; constituent <span class="keyword">if</span> is_success(constituent)</span><br><span class="line"></span><br><span class="line">            <span class="comment">#创建边</span></span><br><span class="line">            @chart.merge!(create_arc_begin_with(constituent))</span><br><span class="line"></span><br><span class="line">            <span class="comment">#扩展边</span></span><br><span class="line">            extend_arc constituent</span><br><span class="line">            @step += <span class="number">1</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">        handle_agenda</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 如果某个成分正好对应着到整个句子，解析成功</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">is_success</span><span class="params">(constituent)</span></span></span><br><span class="line">        <span class="keyword">if</span> constituent.start == <span class="number">0</span> &amp;&amp; constituent.<span class="keyword">end</span> == @words.length</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">create_arc_begin_with</span><span class="params">(constituent)</span></span></span><br><span class="line">        match_grammars = &#123;&#125;</span><br><span class="line">        result = &#123;&#125;</span><br><span class="line"></span><br><span class="line">        @grammars.each() &#123; <span class="params">|key, value|</span> </span><br><span class="line">            match_grammars.store(key, [])</span><br><span class="line">            match_grammars[key].concat value.find_all &#123; <span class="params">|grammar|</span></span><br><span class="line">                grammar == constituent.value <span class="params">||</span></span><br><span class="line">                grammar.start_with?(constituent.value + <span class="string">' '</span>) &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        match_grammars.each &#123; <span class="params">|key, value|</span></span><br><span class="line">            value.each() &#123; <span class="params">|g|</span></span><br><span class="line">                arc = Arc.new(constituent.start, constituent.<span class="keyword">end</span>, g, key, <span class="number">0</span>, [])</span><br><span class="line">                result.store(arc.to_s(), arc) <span class="keyword">unless</span> result.has_key?(arc.to_s())</span><br><span class="line">                p <span class="string">"\s\sAdd new arc to chart: <span class="subst">#&#123;arc.to_s()&#125;</span>"</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># arc extension</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">extend_arc</span><span class="params">(constituent)</span></span></span><br><span class="line">        temp_chart = @chart.values.find_all() &#123; <span class="params">|arc|</span> arc.is_active? &#125;</span><br><span class="line">        <span class="keyword">for</span> arc <span class="keyword">in</span> temp_chart</span><br><span class="line">            <span class="comment">#p arc.to_s</span></span><br><span class="line">            <span class="comment">#p consitutent</span></span><br><span class="line">            <span class="keyword">if</span> arc.is_next?(constituent)</span><br><span class="line">                new_arc = arc.extend_arc(constituent)</span><br><span class="line">                p <span class="string">"\s\sAdd extended arc: <span class="subst">#&#123;new_arc.to_s()&#125;</span>"</span></span><br><span class="line"></span><br><span class="line">                @chart.store(new_arc.to_s(), new_arc) <span class="keyword">unless</span> @chart.has_key?(new_arc.to_s())</span><br><span class="line">                <span class="keyword">unless</span> (new_arc.is_active?)</span><br><span class="line"></span><br><span class="line">                new_constituent = new_arc.create_next_consitutent()</span><br><span class="line">                p <span class="string">"\s\sAdd new constituent: ((<span class="subst">#&#123;new_constituent.value&#125;</span>)<span class="subst">#&#123;new_constituent.start&#125;</span>, <span class="subst">#&#123;new_constituent.<span class="keyword">end</span>&#125;</span>)"</span></span><br><span class="line"></span><br><span class="line">                @agenda &lt;&lt; new_constituent</span><br><span class="line">                <span class="keyword">end</span></span><br><span class="line">            <span class="keyword">end</span></span><br><span class="line">        <span class="keyword">end</span></span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+<h3 id="最终的运行结果"><a href="#最终的运行结果" class="headerlink" title="最终的运行结果"></a>最终的运行结果</h3><pre><code>&quot;Step1 - Input constituent: ((ART), 0, 1)&quot;
+&quot;  Add new arc to chart: ((•ART ADJ N), 0, 1)&quot;
+&quot;  Add new arc to chart: ((•ART N), 0, 1)&quot;
+&quot;  Add extended arc: ((ART •ADJ N), 0, 1)&quot;
+&quot;  Add extended arc: ((ART •N), 0, 1)&quot;
+&quot;Step2 - Input constituent: ((ADJ), 1, 2)&quot;
+&quot;  Add new arc to chart: ((•ADJ N), 1, 2)&quot;
+&quot;  Add extended arc: ((ART ADJ •N), 0, 2)&quot;
+&quot;  Add extended arc: ((ADJ •N), 1, 2)&quot;
+&quot;Step3 - Input constituent: ((N), 2, 3)&quot;
+&quot;  Add extended arc: ((ART ADJ N•), 0, 3)&quot;
+&quot;  Add new constituent: ((NP), 0, 3)&quot;
+&quot;  Add extended arc: ((ADJ N•), 1, 3)&quot;
+&quot;  Add new constituent: ((NP), 1, 3)&quot;
+&quot;Step4 - Input constituent: ((AUX), 2, 3)&quot;
+&quot;  Add new arc to chart: ((•AUX VP), 2, 3)&quot;
+&quot;  Add extended arc: ((AUX •VP), 2, 3)&quot;
+&quot;Step5 - Input constituent: ((V), 2, 3)&quot;
+&quot;  Add new arc to chart: ((•V NP), 2, 3)&quot;
+&quot;  Add extended arc: ((V •NP), 2, 3)&quot;
+&quot;Step6 - Input constituent: ((NP), 0, 3)&quot;
+&quot;  Add new arc to chart: ((•NP VP), 0, 3)&quot;
+&quot;  Add extended arc: ((NP •VP), 0, 3)&quot;
+&quot;Step7 - Input constituent: ((NP), 1, 3)&quot;
+&quot;  Add new arc to chart: ((•NP VP), 1, 3)&quot;
+&quot;  Add extended arc: ((NP •VP), 1, 3)&quot;
+&quot;Step8 - Input constituent: ((N), 3, 4)&quot;
+&quot;Step9 - Input constituent: ((AUX), 3, 4)&quot;
+&quot;  Add new arc to chart: ((•AUX VP), 3, 4)&quot;
+&quot;  Add extended arc: ((AUX •VP), 3, 4)&quot;
+&quot;Step10 - Input constituent: ((V), 3, 4)&quot;
+&quot;  Add new arc to chart: ((•V NP), 3, 4)&quot;
+&quot;  Add extended arc: ((V •NP), 3, 4)&quot;
+&quot;Step11 - Input constituent: ((N), 4, 5)&quot;
+&quot;Step12 - Input constituent: ((V), 4, 5)&quot;
+&quot;  Add new arc to chart: ((•V NP), 4, 5)&quot;
+&quot;  Add extended arc: ((V •NP), 4, 5)&quot;
+&quot;Step13 - Input constituent: ((ART), 5, 6)&quot;
+&quot;  Add new arc to chart: ((•ART ADJ N), 5, 6)&quot;
+&quot;  Add new arc to chart: ((•ART N), 5, 6)&quot;
+&quot;  Add extended arc: ((ART •ADJ N), 5, 6)&quot;
+&quot;  Add extended arc: ((ART •N), 5, 6)&quot;
+&quot;Step14 - Input constituent: ((N), 6, 7)&quot;
+&quot;  Add extended arc: ((ART N•), 5, 7)&quot;
+&quot;  Add new constituent: ((NP), 5, 7)&quot;
+&quot;Step15 - Input constituent: ((V), 6, 7)&quot;
+&quot;  Add new arc to chart: ((•V NP), 6, 7)&quot;
+&quot;  Add extended arc: ((V •NP), 6, 7)&quot;
+&quot;Step16 - Input constituent: ((NP), 5, 7)&quot;
+&quot;  Add new arc to chart: ((•NP VP), 5, 7)&quot;
+&quot;  Add extended arc: ((V NP•), 4, 7)&quot;
+&quot;  Add new constituent: ((VP), 4, 7)&quot;
+&quot;  Add extended arc: ((NP •VP), 5, 7)&quot;
+&quot;Step17 - Input constituent: ((VP), 4, 7)&quot;
+&quot;  Add extended arc: ((AUX VP•), 3, 7)&quot;
+&quot;  Add new constituent: ((VP), 3, 7)&quot;
+&quot;Step18 - Input constituent: ((VP), 3, 7)&quot;
+&quot;  Add extended arc: ((AUX VP•), 2, 7)&quot;
+&quot;  Add new constituent: ((VP), 2, 7)&quot;
+&quot;  Add extended arc: ((NP VP•), 0, 7)&quot;
+&quot;  Add new constituent: ((S), 0, 7)&quot;
+&quot;  Add extended arc: ((NP VP•), 1, 7)&quot;
+&quot;  Add new constituent: ((S), 1, 7)&quot;
+&quot;Step19 - Input constituent: ((VP), 2, 7)&quot;
+&quot;Step20 - Input constituent: ((S), 0, 7)&quot;
+&quot;Step21 - Input constituent: ((S), 1, 7)&quot;
+
+已在 3.859 秒内完成。
+1 个测试，0 个失败，0 个错误
+</code></pre><h3 id="详细分析"><a href="#详细分析" class="headerlink" title="详细分析"></a>详细分析</h3><pre><code>第一步，处理&apos;the&apos;: The large can can hold the water
+    1、待处理表agenda为空，根据&apos;the&apos;生成成分((ART), 0, 1)放入待处理表agenda中；
+    2、从agenda中取出成份((ART), 0, 1)，到语法表中找以ART开头的所有语法，生成活动边：
+        ((•ART ADJ N), 0, 1)
+        ((•ART N), 0, 1)
+    3、对成分((ART), 0, 1)进行处理，扩展当前位置为ART的所有活动边：
+        ((•ART ADJ N)， 0, 1)扩展为((ART •ADJ N), 0, 1)
+        ((•ART N), 0, 1)扩展为((ART •N), 0, 1)
+
+第二步，处理&apos;large&apos;: The •large can can hold the water
+    1、待处理表agenda为空，根据&apos;the&apos;生成成分((ADJ), 1, 2)放入待处理表agenda中；
+    2、从agenda中取出成份((ADJ), 1, 2)，在语法表中找以ADJ开头的所有语法，生成活动边：((•ADJ N), 1, 2)
+    3、对成分((ADJ), 1, 2)进行处理，扩展当前位置为ADJ的所有活动边：
+        ((ART •ADJ N), 0, 1)扩展为((ART ADJ •N), 0, 2)
+        ((•ADJ N), 1, 2)扩展为((ADJ •N), 1, 2)
+
+第三步，处理&apos;can&apos;: The large •can can hold the water
+    1、待处理表agenda为空，根据名词&apos;can&apos;生成成分((N), 2, 3)，放入待处理表agenda中；
+    2、从agenda中取出成份((N), 2, 3)，在语法表中找以N开头的所有语法，没有找到。
+    3、对成分((N), 2, 3)进行处理，扩展当前位置为N的所有活动边:
+        ((ART ADJ •N)0, 2)扩展为((ART ADJ N•), 0, 3)，这是个不活动边，由它生成成分((NP), 0, 3)，并加入到agenda中
+        ((ADJ •N), 1, 2)扩展为((ADJ N•), 1, 3)，这是个不活动边，由它生成成分((NP), 1, 3)，并加入到agenda中
+
+    4、根据副词&apos;can&apos;生成成分((AUX), 2, 3)，在语法表中找以AUX开头的所有语法，生成活动边：((•AUX VP), 2, 3)
+    5、扩展以当前位置为AUX的所有边，将((•AUX VP), 2, 3)扩展为((AUX •VP), 2, 3)
+
+    6、根据动词&apos;can&apos;生成成分((V), 2, 3)，在语法表中找以V开头的所有语法，生成活动边：((•V NP), 2, 3)
+    7、扩展以当前位置为V的所有边，将((•V NP), 2, 3)扩展为((V •NP), 2, 3)
+
+    8、待处理表agenda不空，从agenda中取出成份((NP), 1, 3)，在语法表中找以NP开头的所有语法，生成活动边：((•NP VP), 1, 3)
+    9、对成分((NP), 1, 3)进行处理，扩展当前位置为N的所有活动边:
+        ((•NP VP), 1, 3)扩展为((NP •VP), 1, 3)
+
+    10、待处理表agenda不空，从agenda中取出成份((NP), 0, 3)，在语法表中找以NP开头的所有语法，生成活动边：((•NP VP), 0, 3)
+    11、对成分((NP), 0, 3)进行处理，扩展当前位置为N的所有活动边:
+        ((•NP VP), 0, 3)扩展为((NP •VP), 0, 3)
+
+第四步，处理&apos;can&apos;: The large can •can hold the water
+    1、待处理表agenda为空，根据名词&apos;can&apos;生成成分((N), 3, 4)，放入待处理表agenda中；
+    2、从agenda中取出成份((N), 3, 4)，在语法表中找以N开头的所有语法，没有找到；
+    3、对成分((N), 3, 4)进行处理，扩展当前位置为N的所有活动边，没有找到；
+    4、根据副词&apos;can&apos;生成成分((AUX), 3, 4)，在语法表中找以AUX开头的所有语法，生成活动边：((•AUX VP), 3, 4)
+    5、扩展以当前位置为AUX的所有边，将((•AUX VP), 3, 4)扩展为((AUX •VP), 3, 4)
+    6、根据动词&apos;can&apos;生成成分((V), 3, 4)，在语法表中找以V开头的所有语法，生成活动边：((•V VP), 3, 4)
+    7、扩展以当前位置为V的所有边，将((•V NP), 3, 4)扩展为((V •VP), 3, 4)
+
+第五步，处理&apos;hold&apos;: The large can can •hold the water
+    1、待处理表agenda为空，根据名词&apos;hold&apos;生成成分((N), 4, 5)，放入待处理表agenda中；
+    2、从agenda中取出成份((N), 4, 5)，在语法表中找以N开头的所有语法，没有找到；
+    3、对成分((N), 4, 5)进行处理，扩展当前位置为N的所有活动边，没有找到；
+
+    4、待处理表agenda为空，根据动词&apos;hold&apos;生成成分((V), 4, 5)，放入待处理表agenda中；
+    5、从agenda中取出成份((V), 4, 5)，在语法表中找以V开头的所有语法，生成活动边：((•V NP), 4, 5)
+    6、对成分((V), 4, 5)进行处理，扩展当前位置为V的所有活动边，((•V NP), 4, 5)扩展为((V •NP), 4, 5)
+
+第六步，处理&apos;the&apos;: The large can can hold •the water
+    1、待处理表agenda为空，根据助词&apos;the&apos;生成成分((ART), 5, 6)，放入待处理表agenda中；
+    2、从agenda中取出成份((ART), 5, 6)，在语法表中找以ART开头的所有语法，生成活动边：
+        ((•ART ADJ N), 5, 6)
+        ((•ART N), 5, 6)
+    3、对成分((ART), 5, 6)进行处理，扩展当前位置为ART的所有活动边：
+        ((•ART ADJ N), 5, 6)扩展为((ART •ADJ N), 5, 6)
+        ((•ART N), 5, 6)扩展为((ART •N), 5, 6)
+
+第七步，处理&apos;water&apos;: The large can can hold the •water
+    1、待处理表agenda为空，根据名词&apos;water&apos;生成成分((N), 6, 7)，放入待处理表agenda中；
+    2、从agenda中取出成份((N), 6, 7)，在语法表中找以N开头的所有语法，没有找到；
+    3、对成分((N), 6, 7)进行处理，扩展当前位置为N的所有活动边：
+        ((ART •N), 5, 6)扩展为((ART N•), 5, 7)，这是个不活动边，由它生成成分((NP), 5, 7)，并加入到agenda中
+
+    4、根据动词&apos;water&apos;生成成分((V), 6, 7)，放入待处理表agenda中；
+    5、从agenda中取出成份((V), 6, 7)，在语法表中找以V开头的所有语法，生成活动边((•V NP), 6, 7)；
+    6、对成分((V), 6, 7)进行处理，扩展当前位置为V的所有活动边：((•V NP), 6, 7)扩展为((V •NP), 6, 7)
+
+    7、待处理表agenda不空，从中取出成分((NP), 5, 7)，在语法表中找以NP开头的所有语法，生成活动边((•NP VP), 5, 7)
+    8、对成分((NP), 5, 7)进行处理，扩展当前位置为NP的所有活动边：
+        ((V •NP), 4, 7)扩展为((V NP•), 4, 7)，这是个不活动边，由它生成成分((VP), 4, 7)，并加入到agenda中
+        ((•NP VP), 5, 7)扩展为((NP •VP), 5, 7)
+
+    9、待处理表agenda不空，从中取出成分((VP), 4, 7)，在语法表中找以VP开头的所有语法，没有找到；
+    10、对成分((VP), 4, 7)进行处理，扩展当前位置为VP的所有活动边：
+        ((AUX •VP), 3, 7)扩展为((AUX VP•), 3, 7)，这是个不活动边，由他生成成分((VP), 3, 7)，并加入到agenda中
+
+    11、待处理表agenda不空，从中取出成分((VP), 3, 7)，在语法表中找以VP开头的所有语法，没有找到；
+    12、对成分((VP), 3, 7)进行处理，扩展当前位置为VP的所有活动边：
+        ((AUX •VP), 2, 7)扩展为((AUX VP•), 2, 7)，这是个不活动边，由他生成成分((VP), 0, 7)，并加入到agenda中
+
+    13、待处理表agenda不空，从中取出成分((VP), 0, 7)，在语法表中找以VP开头的所有语法，没有找到；
+    14、对成分((VP), 0, 7)进行处理，扩展当前位置为VP的所有活动边：
+        ((NP •VP), 0, 7)扩展为((NP VP•), 0, 7)，这是个不活动边，由他生成成分((S), 0, 7)，并加入到agenda中
+        ((NP •VP), 1, 7)扩展为((NP VP•), 1, 7)，这是个不活动边，由他生成成分((S), 1, 7)，并加入到agenda中
+
+    15、待处理表agenda不空，从中取出成分((S), 0, 7)，在语法表中找以S开头的所有语法，没有找到；
+    16、对成分((S), 0, 7)进行处理，扩展当前位置为VP的所有活动边：
+        ((NP •VP), 1, 7)扩展为((NP VP•), 1, 7)，这是个不活动边，由他生成成分((S), 0, 7)，并加入到agenda中
+
+    17、待处理表agenda不空，从中取出成分((VP), 2, 7)，在语法表中找以VP开头的所有语法，没有找到；
+    18、待处理表agenda不空，从中取出成分((S), 0, 7)，在语法表中找以S开头的所有语法，没有找到；
+    19、待处理表agenda不空，从中取出成分((S), 1, 7)，在语法表中找以S开头的所有语法，没有找到；
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2019/01/20/tools_chart_parse/" title="线图法解析句子成分">https://leapking.github.io/2019/01/20/tools_chart_parse/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/parse/" rel="tag"><i class="fa fa-tag"></i> parse</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/25/database/database_postgresql_HowToDebugYaccFile/" rel="next" title="PostgreSQL如何调试YACC文件">
+                <i class="fa fa-chevron-left"></i> PostgreSQL如何调试YACC文件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/10/research_note/" rel="prev" title="学习笔记">
+                学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#线图法整体流程"><span class="nav-number">1.</span> <span class="nav-text">线图法整体流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#在《自然语言理解》中对该算法也给了比较明确的说明："><span class="nav-number">1.1.</span> <span class="nav-text">在《自然语言理解》中对该算法也给了比较明确的说明：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#举例"><span class="nav-number">1.2.</span> <span class="nav-text">举例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#代码"><span class="nav-number">1.2.1.</span> <span class="nav-text">代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#最终的运行结果"><span class="nav-number">1.2.2.</span> <span class="nav-text">最终的运行结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#详细分析"><span class="nav-number">1.2.3.</span> <span class="nav-text">详细分析</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

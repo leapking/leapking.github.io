@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="postgres,内存管理," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="PostgreSQL的内存管理介绍">
+<meta name="keywords" content="postgres,内存管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL内存管理">
+<meta property="og:url" content="https://leapking.github.io/2019/02/23/database/database_postgresql_mmgr/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="PostgreSQL的内存管理介绍">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL内存管理">
+<meta name="twitter:description" content="PostgreSQL的内存管理介绍">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2019/02/23/database/database_postgresql_mmgr/"/>
+
+
+
+
+
+  <title>PostgreSQL内存管理 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2019/02/23/database/database_postgresql_mmgr/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">PostgreSQL内存管理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-23T22:22:04+08:00">
+                2019-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/postgres/" itemprop="url" rel="index">
+                    <span itemprop="name">postgres</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  PostgreSQL的内存管理介绍
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PostgreSQL内存管理"><a href="#PostgreSQL内存管理" class="headerlink" title="PostgreSQL内存管理"></a>PostgreSQL内存管理</h1><blockquote>
+<p>版本：postgresql-9.6.9</p>
+</blockquote>
+<h2 id="Linux用户态的内存管理"><a href="#Linux用户态的内存管理" class="headerlink" title="Linux用户态的内存管理"></a>Linux用户态的内存管理</h2><p>在Linux中每个用户程序都运行在虚拟的内存空间中，操作系统内核并没有提供对虚拟内存空间的管理接口，其借助于第三方的开源实现。<br>开源社区公开了很多现成的虚拟内存分配器（Virtual Memory Allocators，以下简称为分配器）：</p>
+<ul>
+<li>dlmalloc – 第一个被广泛使用的通用动态内存分配器；</li>
+<li>ptmalloc2 – glibc 内置分配器的原型；</li>
+<li>jemalloc – FreeBSD ＆ Firefox 所用分配器；</li>
+<li>tcmalloc – Google 贡献的分配器；</li>
+<li>libumem – Solaris 所用分配器；</li>
+</ul>
+<h3 id="glibc内存分配器介绍"><a href="#glibc内存分配器介绍" class="headerlink" title="glibc内存分配器介绍"></a>glibc内存分配器介绍</h3><p>glibc内的分配器起源于ptmalloc2，并已经移植进了glibc内部。</p>
+<ul>
+<li>glibc源码: <a href="http://www.gnu.org/software/libc/libc.html" target="_blank" rel="noopener">http://www.gnu.org/software/libc/libc.html</a></li>
+<li>glibc手册: <a href="http://www.gnu.org/software/libc/manual/html_node/index.html" target="_blank" rel="noopener">http://www.gnu.org/software/libc/manual/html_node/index.html</a></li>
+</ul>
+<p>malloc 内部通过 brk(小于128KB通过移动指针分配) 或 mmap(超过128KB通过内存空间映射分配) 系统调用向内核申请堆区。</p>
+<h3 id="应用程序的内存管理"><a href="#应用程序的内存管理" class="headerlink" title="应用程序的内存管理"></a>应用程序的内存管理</h3><p>本文主要介绍PostgreSQL的动态内存管理机制，PostgreSQL的动态内存管理可以带来以下几方面好处：<br>1) 防止内存泄漏。<br>采用传统的malloc/free来控制和管理内存经常会导致验证的内存泄露。首先，要保证每一个malloc都要有对应的free来释放，这在工程很大函数调用层次很深时，是很难保证的；其次，要保证函数退出或异常处理时每种情况下都能正确的释放内存，这对编码人员要求较高，在团队规模较大，任务紧急时，也是很难保证的。仅仅依赖开发人员的细心难以保证，PostgreSQL的内存管理通过预先分配一大段内存，然后自己来管理这段内存，最后只要在合适的时间点释放这段内存就行，不需要考虑内部的小块内存。</p>
+<p>2) 分配效率。<br>由于堆内存是线程间共享的，所以传统的malloc必须要考虑分配时的线程安全问题，从而要用锁来控制；PostgreSQL由于是多进程架构，每个进程只有一个线程，不需要考虑并发；下面也可以看到，PostgreSQL的内存管理没有涉及到锁，因此性能会快一些。</p>
+<p>3) 减少内存碎片。<br>根据1）的描述，可以看出，通过每次向OS申请一大段内存，然后自己管理，可以有效的减少内存碎片的发生。</p>
+<h2 id="PostgreSQL内存上下文介绍"><a href="#PostgreSQL内存上下文介绍" class="headerlink" title="PostgreSQL内存上下文介绍"></a>PostgreSQL内存上下文介绍</h2><p>在7.0以前，PostgreSQL在处理大查询的大量以引用方式传递的数据时，存在严重的内存泄露问题。在查询结束之前没有一个很好的规范对内存提前进行回收。特别是在允许更大量的数据被传递引用的TOAST功能被引入之后，内存问题变得更加严重而不得不去解决。在7.1时就参考glibc的内存管理，引入了内存上下文的内存管理方式。在SQL的每个执行阶段都有自己的内存上下文，每个阶段完成后，将相关的内存就返回给相关的内存池。</p>
+<p>主要的全局内存上下文：</p>
+<ul>
+<li>TopMemoryContext — 位于内存上下文树型管理结构的顶层，所有其它的内存上下文都是TopMemoryContext的直接或间接子节点。在TopMemoryContext上的内存分配其实和malloc是完全一样的，因为TopMemoryContext是永远存在的，从不会被重用和删除。只有那些会话级或控制模块相关的，需要永久保留的，才能使用TopMemoryContext。</li>
+<li>TopMemoryContext–这是内存环境树实际的最高层级,其他每一个内存环境都是其直接或间接的子内存环境.在这里,分配内存与使用”malloc”一样,因为这个内存环境永远也不会重设或删除.这样做是为了那些永远存在或是在删除时需要非常仔细的情况.一个例子是,fd.c中打开文件的列表,以及内存环境自身的内存环境管理节点本身.,除非真正需要,应避免在这里分配内存.另外,特别要避免在运行时CurrentMemoryContext指向这里.</li>
+<li>PostmasterContext–这是postmaster正常的工作内存环境.后台进程建立之后,就可以删除PostmasterContext,从而释放postmaster不再需要的内存.(所有需要从postmaster传递到后台进程的数据都是通过TopMemoryContext内存环境来传递的.postmaster只有TopMemoryContext,PostmasterContext,以及ErrorContext–其余的最高层次的内存环境将在每个后台进程启动时创建.</li>
+<li>CacheMemoryContext–relcache,catcache以及相关模块的持久存储,无法重设或删除,所以无法真正地将其和TopMemoryContext区分开来.但是需要将两者区分开来以方便调试.(注意:CacheMemoryContext会有短生命周期的子内存环境.例如,有一个作为relcache项的最好的辅助存储的子内存环境.我们可以很容易地释放规则分析树,而无需创建一个可靠版本的freeObject函数来释放规则分析树占用的内存.</li>
+<li>MessageContext–此内存环境持有前台进程传递过来的当前命令消息,以及当前消息衍生出来的并且与当前消息生命周期相同的存储空间.(例如,在simple-Query模式下,分析树和计划树可以在此内存环境中).这个内存环境可以在PostgresMain的每一次循环中被重设,其子内存环境被删除.这与每一个事务和运行平台(portal)的内存环境分开,因为一个查询语句可能需要比单一一个事务或运行平台(portal)保留的时间长或短一些.</li>
+<li>TopTransactionContext–此内存环境一直持续到最高层事务结束的时候.在每一次最高层事务结束的时候,这个内存环境都会被重设,其所有的子内存环境都会被删除.在大多数情况下,你无须在这里分配内存,而应该在CurTransactionContext中分配.在此内存环境中的应该是管理多个子事务状态的控制信息.注意:此内存环境不会在出错时立即清除,而是到事务块通过调用COMMIT/ROLLBACK时清除.</li>
+<li>CurTransactionContext–此内存环境持有当前事务的数据直到当前事务结束,特别是在最高层事务提交时需要此内存环境.当我们处于一个最高层事务中时,此内存环境就跟TopTransactionContext一致,但是在一个子事务中,CurTransactionContext指向一个子内存环境.</li>
+<li>PortalContext–这并不是一个独立的内存环境,而是一个全局变量,指向当前活动着的运行平台的per-portal内存环境.在需要分配与当前运行平台(portal)运行时长一致的存储空间时使用.</li>
+<li>ErrorContext–这个持久性的内存环境会在错误恢复过程中切换过去,然后在恢复结束时重设.我们安排了8K在任何时刻都有效的内存.这样,我们可以保证了,甚至在后台进程已经用尽了其所有内存,都会有一些内存可以用来进行错误恢复.这使得内存用尽可以被当做一个通常的错误(ERROR)情况,而不是一个崩溃(FATAL)情况.</li>
+</ul>
+<h3 id="内存上下文管理结构"><a href="#内存上下文管理结构" class="headerlink" title="内存上下文管理结构"></a>内存上下文管理结构</h3><p>PG里内存上下文的控制结构可以视为两层结构，一个是底层的AllocSet层和上层的MemoryContext层。MemoryContext只是一个抽象类型用于对外提供统一的内存上下文操作的标准接口，只关心SQL执行阶段不同内存上下之前的继承关系，不关心内存本身的分配释放。AllocSet类似于简单的操作系统内存管理，要组织已使用内存和已空闲内存的管理。</p>
+<p>底层的AllocSet具体实现可以有多种方式，但目前只提供了AllocSetContext一种实现。通过看下面的两个结构体介绍可以看到，AllocSetContext最开始位置是一个MemoryContextData类型的属性。这有点像面向对象编程语言中类的继承，其中MemoryContextData是父类，AllocSetContext是子类，在父类的基础上增加了一些新的属性和成员函数。实际上PG里有很多地方采用这样的思想实现对接口的封装。因此所有的实现方式的内存上下文结构都必须以MemoryContext开头，以实现继承的目的。（参见MemoryContextMethods结构的注释部分）</p>
+<p>相关代码：</p>
+<ul>
+<li>src/backend/utils/mmgr/aset.c, mcxt.c, portalmem.c, README: 内存管理模块</li>
+<li>src/include/nodes/memnodes.h: 实现内存上下文管理结构封装接口的头文件</li>
+<li>src/include/utils/memutils.h: 内存上下文对外使用标准接口头文件</li>
+</ul>
+<h4 id="MemoryContextData"><a href="#MemoryContextData" class="headerlink" title="MemoryContextData"></a>MemoryContextData</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">MemoryContextData</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        NodeTag         type;                   <span class="comment">/* identifies exact kind of context */</span></span><br><span class="line">        <span class="comment">/* these two fields are placed here to minimize alignment wastage: */</span></span><br><span class="line">        <span class="keyword">bool</span>            isReset;                <span class="comment">/* T = no space alloced since last reset */</span></span><br><span class="line">        <span class="keyword">bool</span>            allowInCritSection;             <span class="comment">/* allow palloc in critical section */</span></span><br><span class="line">        MemoryContextMethods *methods;          <span class="comment">/* virtual function table */</span></span><br><span class="line">        MemoryContext parent;           <span class="comment">/* NULL if no parent (toplevel context) */</span></span><br><span class="line">        MemoryContext firstchild;       <span class="comment">/* head of linked list of children */</span></span><br><span class="line">        MemoryContext prevchild;        <span class="comment">/* previous child of same parent */</span></span><br><span class="line">        MemoryContext nextchild;        <span class="comment">/* next child of same parent */</span></span><br><span class="line">        <span class="keyword">char</span>       *name;                       <span class="comment">/* context name (just for debugging) */</span></span><br><span class="line">        MemoryContextCallback *reset_cbs;       <span class="comment">/* list of reset/delete callbacks */</span></span><br><span class="line">&#125; MemoryContextData;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>type 标示内存上下文类型，默认只有alloc一种类型T_AllocSetContext</li>
+<li>isReset：记录上次重置后是否有内存申请动作发生</li>
+<li>allowInCritSection: 是否允许在临界区中分配内存。之前都默认不允许，分配失败会导致PANIC，但用于调试代码中应该允许，这些代码不会进入产品</li>
+<li>methods: 记录了内存上下文使用的函数注册表</li>
+<li>parent，prevchild，nextchild组成内存上下文的B-Tree结构，方便在重置或删除内存上下文时查找子节点</li>
+<li>name: 为了调试时显示内存上下文在哪里分配</li>
+</ul>
+<h4 id="AllocSetContext"><a href="#AllocSetContext" class="headerlink" title="AllocSetContext"></a>AllocSetContext</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * AllocSetContext is our standard implementation of MemoryContext.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">Note:</span> header.isReset means there is nothing for AllocSetReset to do.</span></span><br><span class="line"><span class="comment"> * This is different from the aset being physically empty (empty blocks list)</span></span><br><span class="line"><span class="comment"> * because we may still have a keeper block.  It's also different from the set</span></span><br><span class="line"><span class="comment"> * being logically empty, because we don't attempt to detect pfree'ing the</span></span><br><span class="line"><span class="comment"> * last active chunk.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">AllocSetContext</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        MemoryContextData header;       <span class="comment">/* Standard memory-context fields */</span></span><br><span class="line">        <span class="comment">/* Info about storage allocated in this context: */</span></span><br><span class="line">        AllocBlock      blocks;                 <span class="comment">/* head of list of blocks in this set */</span></span><br><span class="line">        AllocChunk      freelist[ALLOCSET_NUM_FREELISTS];               <span class="comment">/* free chunk lists */</span></span><br><span class="line">        <span class="comment">/* Allocation parameters for this context: */</span></span><br><span class="line">        Size            initBlockSize;  <span class="comment">/* initial block size */</span></span><br><span class="line">        Size            maxBlockSize;   <span class="comment">/* maximum block size */</span></span><br><span class="line">        Size            nextBlockSize;  <span class="comment">/* next block size to allocate */</span></span><br><span class="line">        Size            allocChunkLimit;        <span class="comment">/* effective chunk size limit */</span></span><br><span class="line">        AllocBlock      keeper;                 <span class="comment">/* if not NULL, keep this block over resets */</span></span><br><span class="line">&#125; AllocSetContext;</span><br></pre></td></tr></table></figure>
+<p>注释里面说的很清楚：AllocSetContext是默认提供的内存上下文实现方式</p>
+<ul>
+<li><p>header: 标准的内存上下文区域，类型为MemoryContextData</p>
+</li>
+<li><p>blocks: 内存块链表，记录内存上下文向操作系统申请的连续大块内存。顶部内存块为活跃内存块，其空闲空间可继续分配内存片；其它内存块都是非活跃内存块，其所有空间都已分配成内存片，空闲的内存片已被记录到freelist中。</p>
+</li>
+<li><p>freelist: 组织该内存上下文里所有内存块中已释放的内存片的链表结构</p>
+</li>
+<li><p>init,max,next: 内存上下文创建时指定的初始块大小，最大块大小和当前块大小</p>
+</li>
+<li>allocChunkLimit: 内存片的阈值</li>
+<li>keeper: 为防止一些需要频繁重置的小的内存上下文重复的进行malloc，重置时保留第一次申请的内存块。</li>
+</ul>
+<h4 id="内存块与内存片"><a href="#内存块与内存片" class="headerlink" title="内存块与内存片"></a>内存块与内存片</h4><p>在继续往下看之前，我们首先要搞清楚两个概念内存块(block)和内存片(chunk)。</p>
+<ul>
+<li>内存块(block)是内存上下文通过malloc函数，向操作系统申请的大块连续的内存</li>
+<li>内存片(chunk)是数据库内核通过palloc函数，向内存上下申请的需要使用的一段内存</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * AllocBlock</span></span><br><span class="line"><span class="comment"> * An AllocBlock is the unit of memory that is obtained by aset.c</span></span><br><span class="line"><span class="comment"> * from malloc().  It contains one or more AllocChunks, which are</span></span><br><span class="line"><span class="comment"> * the units requested by palloc() and freed by pfree().  AllocChunks</span></span><br><span class="line"><span class="comment"> * cannot be returned to malloc() individually, instead they are put</span></span><br><span class="line"><span class="comment"> * on freelists by pfree() and re-used by the next palloc() that has</span></span><br><span class="line"><span class="comment"> * a matching request size.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * AllocBlockData is the header data for a block --- the usable space</span></span><br><span class="line"><span class="comment"> * within the block begins at the next alignment boundary.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">AllocBlockData</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        AllocSet        aset;           <span class="comment">/* aset that owns this block */</span></span><br><span class="line">        AllocBlock      prev;           <span class="comment">/* prev block in aset's blocks list, if any */</span></span><br><span class="line">        AllocBlock      next;           <span class="comment">/* next block in aset's blocks list, if any */</span></span><br><span class="line">        <span class="keyword">char</span>       *freeptr;            <span class="comment">/* start of free space in this block */</span></span><br><span class="line">        <span class="keyword">char</span>       *endptr;             <span class="comment">/* end of space in this block */</span></span><br><span class="line">&#125;       AllocBlockData;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>aset: 指向拥有这个block的AllocSetContext结构</li>
+<li>prev, next: 当前内存块的上一个和下一个内存块的地址，用于组织成链表结构方便重置和释放。</li>
+<li>freeptr: 指向当前内存块中空闲空间的首地址</li>
+<li>endptr: 指向当前内存块的尾地址</li>
+</ul>
+<p>一个内存块的物理结构形式如下，前面是控制结构，后面是实际使用的空间。</p>
+<pre><code>++++++++++++++++++
++ AllocBlockData +
+++++++++++++++++++
++   used space   +
++   free space   +
++   free space   +
+++++++++++++++++++
+</code></pre><p>通过AllocBlockData结构的注释我们可以知道，AllocBlock内存块是aset.c向操作系统申请内存的最小单元结构。AllocBlock内存块中包含了很多AllocChunks内存片，内存片是palloc,pfree操纵的内存单元结构。内存片释放后会归还到AllocSetContext的空闲列表中，而不是归还给操作系统。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * AllocChunk</span></span><br><span class="line"><span class="comment"> *              The prefix of each piece of memory in an AllocBlock</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * NB: this MUST match StandardChunkHeader as defined by utils/memutils.h.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">AllocChunkData</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        <span class="comment">/* aset is the owning aset if allocated, or the freelist link if free */</span></span><br><span class="line">        <span class="keyword">void</span>       *aset;</span><br><span class="line">        <span class="comment">/* size is always the size of the usable space in the chunk */</span></span><br><span class="line">        Size            size;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> MEMORY_CONTEXT_CHECKING</span></span><br><span class="line">        <span class="comment">/* when debugging memory usage, also store actual requested size */</span></span><br><span class="line">        <span class="comment">/* this is zero in a free chunk */</span></span><br><span class="line">        Size            requested_size;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;       AllocChunkData;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>aset: aset是一个多重复用指针，内存片被使用时指向内存上下文地址; 内存片被释放时指向内存块的freelist(相当于单向链表的next指针)</li>
+<li>size: 内存片分配的可用空间大小</li>
+<li><p>requested_size: 用户申请时申请的内存大小</p>
+<p>一个内存片的物理结构形式如下，前面是控制结构，后面是实际使用的空间。</p>
+<p>  ++++++++++++++++++</p>
+<ul>
+<li>AllocChunkData +<br>++++++++++++++++++</li>
+<li>alloc space  +<br>++++++++++++++++++</li>
+</ul>
+</li>
+</ul>
+<p>内存片是内存块被分割使用形成的一个个内存片段，内存片空间的开头是AllocChunkData结构，后面是该内存片的用户实际使用空间，palloc返回的是用户实际使用空间的首地址。内存片有两种状态被使用和被释放，同时存在于内存块当中。内存片被释放时仅仅是将内存片记录到AllocSetContext的freelist当中，并不进行内存的移动和归还给操作系统。</p>
+<h4 id="freelist"><a href="#freelist" class="headerlink" title="freelist"></a>freelist</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">AllocSetContext</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">        MemoryContextData header;       <span class="comment">/* Standard memory-context fields */</span></span><br><span class="line">        <span class="comment">/* ... */</span></span><br><span class="line">        AllocChunk      freelist[ALLOCSET_NUM_FREELISTS];               <span class="comment">/* free chunk lists */</span></span><br><span class="line">        <span class="comment">/* ... */</span></span><br><span class="line">&#125; AllocSetContext;</span><br></pre></td></tr></table></figure>
+<p>操作系统内核只提供了很基础的物理内存的映射接口，应用程序使用的malloc,free只是glibc对内存管理的一种实现。通过文章开头可以看到用户态的内存管理有很多种实现方式。不管哪种方式，<br>对空闲内存的管理往往代表着该种方式的效率。PG里的内存上下文管理，相当于在glibc等实现的基础之上，又在应用层进行自己的内存管理。同样freelist管理也很重要。每个内存上下文的AllocSetContext结构中都维护着一个freelist</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*--------------------</span></span><br><span class="line"><span class="comment"> * Chunk freelist k holds chunks of size 1 &lt;&lt; (k + ALLOC_MINBITS),</span></span><br><span class="line"><span class="comment"> * for k = 0 .. ALLOCSET_NUM_FREELISTS-1.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Note that all chunks in the freelists have power-of-2 sizes.  This</span></span><br><span class="line"><span class="comment"> * improves recyclability: we may waste some space, but the wasted space</span></span><br><span class="line"><span class="comment"> * should stay pretty constant as requests are made and released.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * A request too large for the last freelist is handled by allocating a</span></span><br><span class="line"><span class="comment"> * dedicated block from malloc().  The block still has a block header and</span></span><br><span class="line"><span class="comment"> * chunk header, but when the chunk is freed we'll return the whole block</span></span><br><span class="line"><span class="comment"> * to malloc(), not put it on our freelists.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * CAUTION: ALLOC_MINBITS must be large enough so that</span></span><br><span class="line"><span class="comment"> * 1&lt;&lt;ALLOC_MINBITS is at least MAXALIGN,</span></span><br><span class="line"><span class="comment"> * or we may fail to align the smallest chunks adequately.</span></span><br><span class="line"><span class="comment"> * 8-byte alignment is enough on all currently known machines.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * With the current parameters, request sizes up to 8K are treated as chunks,</span></span><br><span class="line"><span class="comment"> * larger requests go into dedicated blocks.  Change ALLOCSET_NUM_FREELISTS</span></span><br><span class="line"><span class="comment"> * to adjust the boundary point; and adjust ALLOCSET_SEPARATE_THRESHOLD in</span></span><br><span class="line"><span class="comment"> * memutils.h to agree.  (<span class="doctag">Note:</span> in contexts with small maxBlockSize, we may</span></span><br><span class="line"><span class="comment"> * set the allocChunkLimit to less than 8K, so as to avoid space wastage.)</span></span><br><span class="line"><span class="comment"> *--------------------</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ALLOC_MINBITS           3       <span class="comment">/* smallest chunk size is 8 bytes */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ALLOCSET_NUM_FREELISTS  11</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ALLOC_CHUNK_LIMIT       (1 &lt;&lt; (ALLOCSET_NUM_FREELISTS-1+ALLOC_MINBITS))</span></span><br><span class="line"><span class="comment">/* Size of largest chunk that we use a fixed size for */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ALLOC_CHUNK_FRACTION    4</span></span><br><span class="line"><span class="comment">/* We allow chunks to be at most 1/4 of maxBlockSize (less overhead) */</span></span><br></pre></td></tr></table></figure>
+<p>freelist结构：</p>
+<pre><code>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ 8 | 16 | 32 | 64 | 128 | 256 | 512 | 1024 | 2048 | 4096 | 8192 +
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ck11      ck22       ck41       ck23          ck32
+ck21      ck31                  ck42
+                                ck12
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+注：这些ck分别表示指向不同block的chunk，同一个链上的chunk大小一样
+</code></pre><ul>
+<li>AllocSetContext结构中freelist是一个定长指针数组（默认长度为ALLOCSET_NUM_FREELISTS），数组里每一项都存了一种按空闲内存片大小分的不同的空闲内存片链表的头指针。</li>
+<li>freelist的第k个位置存储大小为2^(k+ALLOC_MINBITS)的空闲内存片组成的链表，k从0到ALLOCSET_NUM_FREELISTS-1。例如：数组下标0位置保存8字节的内存片，下标1位置保存16字节的内存片，以此类推，freelist中可以保存的最大的内存片为8k字节。</li>
+<li>内存片大小都是2的次幂，这意味着一些空间的浪费。</li>
+<li>如果一次内存申请超过内存片大小限制，那么将创建一个只有一个内存片的特殊内存块，释放时直接归还操作系统，而不是加入freelist中。</li>
+</ul>
+<h3 id="算法实现"><a href="#算法实现" class="headerlink" title="算法实现"></a>算法实现</h3><h4 id="AllocSetContextCreate"><a href="#AllocSetContextCreate" class="headerlink" title="AllocSetContextCreate"></a>AllocSetContextCreate</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 1. 调用标准内存上下文创建接口创建内存上下文，并设置init,next,max大小 */</span></span><br><span class="line"><span class="built_in">set</span> = (AllocSet) MemoryContextCreate(T_AllocSetContext,</span><br><span class="line">                                <span class="keyword">sizeof</span>(AllocSetContext),</span><br><span class="line">                                &amp;AllocSetMethods,</span><br><span class="line">                                parent,</span><br><span class="line">                                name);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 2. 设置内存上下的增长大小和限制 */</span></span><br><span class="line"><span class="built_in">set</span>-&gt;initBlockSize; <span class="comment">//第一个内存块大小，最小1KB</span></span><br><span class="line"><span class="built_in">set</span>-&gt;nextBlockSize; <span class="comment">//下一个内存块大小，每次翻倍增长，达到maxBlockSize后不再增长。</span></span><br><span class="line"><span class="built_in">set</span>-&gt;maxBlockSize;  <span class="comment">//最大的内存块大小</span></span><br><span class="line"><span class="built_in">set</span>-&gt;allocChunkLimit; <span class="comment">//内存片大小限制，不能大于freelist限制</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 为该内存块计算内存片的最大限制，由于freelist的长度，首先内存片大小不能大于ALLOC_CHUNK_LIMIT</span></span><br><span class="line"><span class="comment"> * 通常情况maxBlockSize都是2的整数次幂，内存片最大是maxBlockSize的1/8</span></span><br><span class="line"><span class="comment"> * 先将allocChunkLimit设置为默认最大限制ALLOC_CHUNK_LIMIT，然后只要allocChunkLimit + ALLOC_CHUNKHDRSZ大于“最大内存块可用空间的1/4”，则对allocChunkLimit除2。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="built_in">set</span>-&gt;allocChunkLimit = ALLOC_CHUNK_LIMIT;</span><br><span class="line"><span class="keyword">while</span> ((Size) (<span class="built_in">set</span>-&gt;allocChunkLimit + ALLOC_CHUNKHDRSZ) &gt;</span><br><span class="line">        (Size) ((maxBlockSize - ALLOC_BLOCKHDRSZ) / ALLOC_CHUNK_FRACTION))</span><br><span class="line">    <span class="built_in">set</span>-&gt;allocChunkLimit &gt;&gt;= <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 3. 是否提前给内存上下文分配内存块 */</span></span><br><span class="line"><span class="comment">/* 如果设置了minContextSize，并且minContextSize大于最小的大小(ALLOC_BLOCKHDRSZ + ALLOC_CHUNKHDRSZ)则提前创建好一个内存块。</span></span><br><span class="line"><span class="comment"> * 内存上下文创建时minContextSize一般都为0，只有ErrorContext才设置为8k，以便即使是内存不足时，在错误处理流程中仍有内存空间使用。</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<h4 id="AllocSetAlloc"><a href="#AllocSetAlloc" class="headerlink" title="AllocSetAlloc"></a>AllocSetAlloc</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 1. 看用户请求的内存大小是否超过了内存片大小限制（内存块的1/8） */</span></span><br><span class="line"><span class="keyword">if</span> (size &gt; <span class="built_in">set</span>-&gt;allocChunkLimit) &#123;</span><br><span class="line">    <span class="comment">/*如果超过了，则为该请求分配一个特殊的大内存块（仅含单个内存片，并且释放时立即归还给操作系统）</span></span><br><span class="line"><span class="comment">     * 将新建block放到block链表中顶部活跃block的后面，也就是第二个位置</span></span><br><span class="line"><span class="comment">     * 如果放到链表第一个位置，那么顶部活跃block的空闲空间由于尚未加入freelist将被永远浪费</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    block = (AllocBlock) <span class="built_in">malloc</span>(size + ALLOC_BLOCKHDRSZ + ALLOC_CHUNKHDRSZ);</span><br><span class="line">    <span class="keyword">return</span> chunk;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 2. 按申请大小查找相应的freelist中的链表，看有无空闲chunk可用 */</span></span><br><span class="line">fidx = AllocSetFreeIndex(size);</span><br><span class="line">chunk = <span class="built_in">set</span>-&gt;freelist[fidx];</span><br><span class="line"><span class="keyword">if</span> (chunk != <span class="literal">NULL</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">set</span>-&gt;freelist[fidx] = (AllocChunk) chunk-&gt;aset;</span><br><span class="line">    chunk-&gt;aset = (<span class="keyword">void</span> *) <span class="built_in">set</span>;</span><br><span class="line">    <span class="keyword">return</span> chunk;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 3. 看内存块链表顶部的活跃block中是否有空间可分配 */</span></span><br><span class="line"><span class="keyword">if</span> ((block = <span class="built_in">set</span>-&gt;blocks) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">    Size availspace = block-&gt;endptr - block-&gt;freeptr;</span><br><span class="line">    <span class="keyword">if</span> (availspace &lt; (chunk_size + ALLOC_CHUNKHDRSZ)) &#123;</span><br><span class="line">        <span class="comment">/* 顶部活跃内存块的剩余空间不满足申请大小时，需要将其剩余空间全部变成空闲chunk加入到freelist中 */</span></span><br><span class="line">        <span class="keyword">while</span> (availspace &gt;= ((<span class="number">1</span> &lt;&lt; ALLOC_MINBITS) + ALLOC_CHUNKHDRSZ)) &#123;</span><br><span class="line">            <span class="comment">/* 如果剩余空间大于freelist中最小大小+ALLOC_CHUNKHDRSZ */</span></span><br><span class="line">            Size availchunk = availspace - ALLOC_CHUNKHDRSZ;</span><br><span class="line">            <span class="keyword">int</span> a_fidx = AllocSetFreeIndex(availchunk);</span><br><span class="line"></span><br><span class="line">            <span class="comment">/* </span></span><br><span class="line"><span class="comment">             * In most cases, we'll get back the index of the next larger</span></span><br><span class="line"><span class="comment">             * freelist than the one we need to put this chunk on.  The</span></span><br><span class="line"><span class="comment">             * exception is when availchunk is exactly a power of 2.</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="keyword">if</span> (availchunk != ((Size) <span class="number">1</span> &lt;&lt; (a_fidx + ALLOC_MINBITS)))</span><br><span class="line">            &#123;</span><br><span class="line">                a_fidx--;</span><br><span class="line">                availchunk = ((Size) <span class="number">1</span> &lt;&lt; (a_fidx + ALLOC_MINBITS));</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            chunk = (AllocChunk) (block-&gt;freeptr);</span><br><span class="line">            block-&gt;freeptr += (availchunk + ALLOC_CHUNKHDRSZ);</span><br><span class="line">            availspace -= (availchunk + ALLOC_CHUNKHDRSZ);</span><br><span class="line">            chunk-&gt;size = availchunk;</span><br><span class="line">            chunk-&gt;aset = (<span class="keyword">void</span> *) <span class="built_in">set</span>-&gt;freelist[a_fidx];</span><br><span class="line">            <span class="built_in">set</span>-&gt;freelist[a_fidx] = chunk;</span><br><span class="line">        &#125;</span><br><span class="line">        block = <span class="literal">NULL</span>; <span class="comment">/* 需要分配新的内存块 */</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 4. 没有内存块或活跃内存块空间不足时，分配新的内存块 */</span></span><br><span class="line"><span class="keyword">if</span> (block == <span class="literal">NULL</span>)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/*分配一个新的内存块*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 5. 从当前可用内存块中分配内存片 */</span></span><br></pre></td></tr></table></figure>
+<h4 id="AllocSetRealloc"><a href="#AllocSetRealloc" class="headerlink" title="AllocSetRealloc"></a>AllocSetRealloc</h4><p>Realloc用户申请的内存片。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 1. 因为申请size在分配内存时已经按2的整数次幂对齐了，因此有可能oldsize已经大于了newsize */</span></span><br><span class="line"><span class="keyword">if</span> (oldsize &gt;= size)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> pointer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 2. 大于set-&gt;allocChunkLimit的叫做单内存片的超大内存块，直接relloc */</span></span><br><span class="line"><span class="keyword">if</span> (oldsize &gt; <span class="built_in">set</span>-&gt;allocChunkLimit)</span><br><span class="line">&#123;</span><br><span class="line">    block = (AllocBlock) <span class="built_in">realloc</span>(block, blksize);</span><br><span class="line">    <span class="keyword">return</span> pointer;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 3. 分配新大小的内存片，拷贝内容后，释放旧的内存片 */</span></span><br></pre></td></tr></table></figure>
+<h4 id="AllocSetFree"><a href="#AllocSetFree" class="headerlink" title="AllocSetFree"></a>AllocSetFree</h4><p>释放用户申请的内存片，由pfree调用。</p>
+<ul>
+<li>如果该内存片是个超大内存片（超过正常内存片限制，所在内存块仅含该内存片），则直接归还给操作系统</li>
+<li>否则，将该内存片加入到freelist中</li>
+</ul>
+<h4 id="AllocSetDelete"><a href="#AllocSetDelete" class="headerlink" title="AllocSetDelete"></a>AllocSetDelete</h4><p>将内存上下文所有的内存块归还给操作系统。</p>
+<ul>
+<li>清空set-&gt;freelist</li>
+<li>释放set-&gt;blocks中所有block，包括set-&gt;keeper</li>
+</ul>
+<h4 id="AllocSetReset"><a href="#AllocSetReset" class="headerlink" title="AllocSetReset"></a>AllocSetReset</h4><p>重置内存上下文，仅保留内存块链表顶部的活跃内存块。</p>
+<ul>
+<li>清空set-&gt;freelist</li>
+<li>释放set-&gt;keeper以外的其它set-&gt;blocks，再把set-&gt;blocks设置为set-&gt;keeper</li>
+<li>set-&gt;nextBlockSize设置为set-&gt;initBlockSize</li>
+</ul>
+<h4 id="AllocSetIsEmpty"><a href="#AllocSetIsEmpty" class="headerlink" title="AllocSetIsEmpty"></a>AllocSetIsEmpty</h4><p>内存上下文是否是空的，其实是除了keeper（第一次分配的内存块）以为是否包含其它内存块。</p>
+<h4 id="AllocSetStats"><a href="#AllocSetStats" class="headerlink" title="AllocSetStats"></a>AllocSetStats</h4><p>统计内存上下文的内存块数，内存片数，总空间大小，剩余空间大小。</p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>[1] <a href="https://blog.csdn.net/u014539401/article/details/51893272" target="_blank" rel="noopener">Postgresql内存上下文分析</a></li>
+<li>[2] <a href="https://blog.csdn.net/Bumanji/article/details/5988370" target="_blank" rel="noopener">[PostgreSQL]内存分配系统的重新设计</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2019/02/23/database/database_postgresql_mmgr/" title="PostgreSQL内存管理">https://leapking.github.io/2019/02/23/database/database_postgresql_mmgr/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/postgres/" rel="tag"><i class="fa fa-tag"></i> postgres</a>
+          
+            <a href="/tags/内存管理/" rel="tag"><i class="fa fa-tag"></i> 内存管理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/16/linux/linux_glibc_memory_threadarena/" rel="next" title="glibc ptmalloc内存管理">
+                <i class="fa fa-chevron-left"></i> glibc ptmalloc内存管理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/24/database/database_mysql_start/" rel="prev" title="MySQL编译调试">
+                MySQL编译调试 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PostgreSQL内存管理"><span class="nav-number">1.</span> <span class="nav-text">PostgreSQL内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux用户态的内存管理"><span class="nav-number">1.1.</span> <span class="nav-text">Linux用户态的内存管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#glibc内存分配器介绍"><span class="nav-number">1.1.1.</span> <span class="nav-text">glibc内存分配器介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用程序的内存管理"><span class="nav-number">1.1.2.</span> <span class="nav-text">应用程序的内存管理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PostgreSQL内存上下文介绍"><span class="nav-number">1.2.</span> <span class="nav-text">PostgreSQL内存上下文介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#内存上下文管理结构"><span class="nav-number">1.2.1.</span> <span class="nav-text">内存上下文管理结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MemoryContextData"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">MemoryContextData</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetContext"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">AllocSetContext</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#内存块与内存片"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">内存块与内存片</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#freelist"><span class="nav-number">1.2.1.4.</span> <span class="nav-text">freelist</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法实现"><span class="nav-number">1.2.2.</span> <span class="nav-text">算法实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetContextCreate"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">AllocSetContextCreate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetAlloc"><span class="nav-number">1.2.2.2.</span> <span class="nav-text">AllocSetAlloc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetRealloc"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">AllocSetRealloc</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetFree"><span class="nav-number">1.2.2.4.</span> <span class="nav-text">AllocSetFree</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetDelete"><span class="nav-number">1.2.2.5.</span> <span class="nav-text">AllocSetDelete</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetReset"><span class="nav-number">1.2.2.6.</span> <span class="nav-text">AllocSetReset</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetIsEmpty"><span class="nav-number">1.2.2.7.</span> <span class="nav-text">AllocSetIsEmpty</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AllocSetStats"><span class="nav-number">1.2.2.8.</span> <span class="nav-text">AllocSetStats</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.3.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

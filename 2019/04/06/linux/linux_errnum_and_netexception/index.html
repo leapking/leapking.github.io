@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux,errno," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Linux错误代码含义及网络异常处理">
+<meta name="keywords" content="linux,errno">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux错误代码含义及网络异常处理">
+<meta property="og:url" content="https://leapking.github.io/2019/04/06/linux/linux_errnum_and_netexception/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="Linux错误代码含义及网络异常处理">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux错误代码含义及网络异常处理">
+<meta name="twitter:description" content="Linux错误代码含义及网络异常处理">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2019/04/06/linux/linux_errnum_and_netexception/"/>
+
+
+
+
+
+  <title>Linux错误代码含义及网络异常处理 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2019/04/06/linux/linux_errnum_and_netexception/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux错误代码含义及网络异常处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-06T21:57:40+08:00">
+                2019-04-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  Linux错误代码含义及网络异常处理
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Linux错误代码含义及网络异常处理"><a href="#Linux错误代码含义及网络异常处理" class="headerlink" title="Linux错误代码含义及网络异常处理"></a>Linux错误代码含义及网络异常处理</h1><h2 id="Linux错误代码及其含义"><a href="#Linux错误代码及其含义" class="headerlink" title="Linux错误代码及其含义"></a>Linux错误代码及其含义</h2><p>在进行一些linux系统调用返回错误时，可以通过内置变量errno来获取错误号。在/usr/include/asm-generic/errno.h和errno-base.h定义了如下错误号的宏定义</p>
+<table>
+<thead>
+<tr>
+<th>C Name</th>
+<th>Value</th>
+<th>Description</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Success</td>
+<td>0</td>
+<td>Success</td>
+<td>成功</td>
+</tr>
+<tr>
+<td>EPERM</td>
+<td>1</td>
+<td>Operation not permitted</td>
+<td>操作不允许</td>
+</tr>
+<tr>
+<td>ENOENT</td>
+<td>2</td>
+<td>No such file or directory</td>
+<td>没有这样的文件或目录</td>
+</tr>
+<tr>
+<td>ESRCH</td>
+<td>3</td>
+<td>No such process</td>
+<td>没有这样的过程</td>
+</tr>
+<tr>
+<td>EINTR</td>
+<td>4</td>
+<td>Interrupted system call</td>
+<td>系统调用被中断</td>
+</tr>
+<tr>
+<td>EIO</td>
+<td>5</td>
+<td>I/O error</td>
+<td>I/O错误</td>
+</tr>
+<tr>
+<td>ENXIO</td>
+<td>6</td>
+<td>No such device or address</td>
+<td>没有这样的设备或地址</td>
+</tr>
+<tr>
+<td>E2BIG</td>
+<td>7</td>
+<td>Arg list too long</td>
+<td>参数列表太长</td>
+</tr>
+<tr>
+<td>ENOEXEC</td>
+<td>8</td>
+<td>Exec format error</td>
+<td>执行格式错误</td>
+</tr>
+<tr>
+<td>EBADF</td>
+<td>9</td>
+<td>Bad file number</td>
+<td>坏的文件描述符</td>
+</tr>
+<tr>
+<td>ECHILD</td>
+<td>10</td>
+<td>No child processes</td>
+<td>没有子进程</td>
+</tr>
+<tr>
+<td>EAGAIN</td>
+<td>11</td>
+<td>Try again</td>
+<td>资源暂时不可用</td>
+</tr>
+<tr>
+<td>ENOMEM</td>
+<td>12</td>
+<td>Out of memory</td>
+<td>内存溢出</td>
+</tr>
+<tr>
+<td>EACCES</td>
+<td>13</td>
+<td>Permission denied</td>
+<td>拒绝许可</td>
+</tr>
+<tr>
+<td>EFAULT</td>
+<td>14</td>
+<td>Bad address</td>
+<td>错误的地址</td>
+</tr>
+<tr>
+<td>ENOTBLK</td>
+<td>15</td>
+<td>Block device required</td>
+<td>块设备请求</td>
+</tr>
+<tr>
+<td>EBUSY</td>
+<td>16</td>
+<td>Device or resource busy</td>
+<td>设备或资源忙</td>
+</tr>
+<tr>
+<td>EEXIST</td>
+<td>17</td>
+<td>File exists</td>
+<td>文件存在</td>
+</tr>
+<tr>
+<td>EXDEV</td>
+<td>18</td>
+<td>Cross-device link</td>
+<td>无效的交叉链接</td>
+</tr>
+<tr>
+<td>ENODEV</td>
+<td>19</td>
+<td>No such device</td>
+<td>设备不存在</td>
+</tr>
+<tr>
+<td>ENOTDIR</td>
+<td>20</td>
+<td>Not a directory</td>
+<td>不是一个目录</td>
+</tr>
+<tr>
+<td>EISDIR</td>
+<td>21</td>
+<td>Is a directory</td>
+<td>是一个目录</td>
+</tr>
+<tr>
+<td>EINVAL</td>
+<td>22</td>
+<td>Invalid argument</td>
+<td>无效的参数</td>
+</tr>
+<tr>
+<td>ENFILE*</td>
+<td>23</td>
+<td>File table overflow</td>
+<td>打开太多的文件系统</td>
+</tr>
+<tr>
+<td>EMFILE</td>
+<td>24</td>
+<td>Too many open files</td>
+<td>打开的文件过多</td>
+</tr>
+<tr>
+<td>ENOTTY</td>
+<td>25</td>
+<td>Not a tty device</td>
+<td>不是tty设备</td>
+</tr>
+<tr>
+<td>ETXTBSY</td>
+<td>26</td>
+<td>Text file busy</td>
+<td>文本文件忙</td>
+</tr>
+<tr>
+<td>EFBIG</td>
+<td>27</td>
+<td>File too large</td>
+<td>文件太大</td>
+</tr>
+<tr>
+<td>ENOSPC</td>
+<td>28</td>
+<td>No space left on device</td>
+<td>设备上没有空间</td>
+</tr>
+<tr>
+<td>ESPIPE</td>
+<td>29</td>
+<td>Illegal seek</td>
+<td>非法移位</td>
+</tr>
+<tr>
+<td>EROFS</td>
+<td>30</td>
+<td>Read-only file system</td>
+<td>只读文件系统</td>
+</tr>
+<tr>
+<td>EMLINK</td>
+<td>31</td>
+<td>Too many links</td>
+<td>太多的链接</td>
+</tr>
+<tr>
+<td>EPIPE</td>
+<td>32</td>
+<td>Broken pipe</td>
+<td>管道破裂</td>
+</tr>
+<tr>
+<td>EDOM</td>
+<td>33</td>
+<td>Math argument out of domain</td>
+<td>数值结果超出范围</td>
+</tr>
+<tr>
+<td>ERANGE</td>
+<td>34</td>
+<td>Math result not representable</td>
+<td>数值结果不具代表性</td>
+</tr>
+<tr>
+<td>EDEADLK</td>
+<td>35</td>
+<td>Resource deadlock would occur</td>
+<td>资源死锁错误</td>
+</tr>
+<tr>
+<td>ENAMETOOLONG</td>
+<td>36</td>
+<td>Filename too long</td>
+<td>文件名太长</td>
+</tr>
+<tr>
+<td>ENOLCK</td>
+<td>37</td>
+<td>No record locks available</td>
+<td>没有可用锁</td>
+</tr>
+<tr>
+<td>ENOSYS</td>
+<td>38</td>
+<td>Function not implemented</td>
+<td>功能没有实现</td>
+</tr>
+<tr>
+<td>ENOTEMPTY</td>
+<td>39</td>
+<td>Directory not empty</td>
+<td>目录不空</td>
+</tr>
+<tr>
+<td>ELOOP</td>
+<td>40</td>
+<td>Too many symbolic links encountered</td>
+<td>符号链接层次太多</td>
+</tr>
+<tr>
+<td>EWOULDBLOCK</td>
+<td>41</td>
+<td>Same as EAGAIN</td>
+<td>和EAGAIN一样</td>
+</tr>
+<tr>
+<td>ENOMSG</td>
+<td>42</td>
+<td>No message of desired type</td>
+<td>没有期望类型的消息</td>
+</tr>
+<tr>
+<td>EIDRM</td>
+<td>43</td>
+<td>Identifier removed</td>
+<td>标识符删除</td>
+</tr>
+<tr>
+<td>ECHRNG</td>
+<td>44</td>
+<td>Channel number out of range</td>
+<td>频道数目超出范围</td>
+</tr>
+<tr>
+<td>EL2NSYNC</td>
+<td>45</td>
+<td>Level 2 not synchronized</td>
+<td>2级不同步</td>
+</tr>
+<tr>
+<td>EL3HLT</td>
+<td>46</td>
+<td>Level 3 halted</td>
+<td>3级中断</td>
+</tr>
+<tr>
+<td>EL3RST</td>
+<td>47</td>
+<td>Level 3 reset</td>
+<td>3级复位</td>
+</tr>
+<tr>
+<td>ELNRNG</td>
+<td>48</td>
+<td>Link number out of range</td>
+<td>链接数超出范围</td>
+</tr>
+<tr>
+<td>EUNATCH</td>
+<td>49</td>
+<td>Protocol driver not attached</td>
+<td>协议驱动程序没有连接</td>
+</tr>
+<tr>
+<td>ENOCSI</td>
+<td>50</td>
+<td>No CSI structure available</td>
+<td>没有可用CSI结构</td>
+</tr>
+<tr>
+<td>EL2HLT</td>
+<td>51</td>
+<td>Level 2 halted</td>
+<td>2级中断</td>
+</tr>
+<tr>
+<td>EBADE</td>
+<td>52</td>
+<td>Invalid exchange</td>
+<td>无效的交换</td>
+</tr>
+<tr>
+<td>EBADR</td>
+<td>53</td>
+<td>Invalid request descriptor</td>
+<td>请求描述符无效</td>
+</tr>
+<tr>
+<td>EXFULL</td>
+<td>54</td>
+<td>Exchange full</td>
+<td>交换全</td>
+</tr>
+<tr>
+<td>ENOANO</td>
+<td>55</td>
+<td>No anode</td>
+<td>没有阳极</td>
+</tr>
+<tr>
+<td>EBADRQC</td>
+<td>56</td>
+<td>Invalid request code</td>
+<td>无效的请求代码</td>
+</tr>
+<tr>
+<td>EBADSLT</td>
+<td>57</td>
+<td>Invalid slot</td>
+<td>无效的槽</td>
+</tr>
+<tr>
+<td>EDEADLOCK</td>
+<td>58</td>
+<td>Same as EDEADLK</td>
+<td>和EDEADLK一样</td>
+</tr>
+<tr>
+<td>EBFONT</td>
+<td>59</td>
+<td>Bad font file format</td>
+<td>错误的字体文件格式</td>
+</tr>
+<tr>
+<td>ENOSTR</td>
+<td>60</td>
+<td>Device not a stream</td>
+<td>设备不是字符流</td>
+</tr>
+<tr>
+<td>ENODATA</td>
+<td>61</td>
+<td>No data available</td>
+<td>无可用数据</td>
+</tr>
+<tr>
+<td>ETIME</td>
+<td>62</td>
+<td>Timer expired</td>
+<td>计时器过期</td>
+</tr>
+<tr>
+<td>ENOSR</td>
+<td>63</td>
+<td>Out of streams resources</td>
+<td>流资源溢出</td>
+</tr>
+<tr>
+<td>ENONET</td>
+<td>64</td>
+<td>Machine is not on the network</td>
+<td>机器不上网</td>
+</tr>
+<tr>
+<td>ENOPKG</td>
+<td>65</td>
+<td>Package not installed</td>
+<td>没有安装软件包</td>
+</tr>
+<tr>
+<td>EREMOTE</td>
+<td>66</td>
+<td>Object is remote</td>
+<td>对象是远程的</td>
+</tr>
+<tr>
+<td>ENOLINK</td>
+<td>67</td>
+<td>Link has been severed</td>
+<td>联系被切断</td>
+</tr>
+<tr>
+<td>EADV</td>
+<td>68</td>
+<td>Advertise error</td>
+<td>广告的错误</td>
+</tr>
+<tr>
+<td>ESRMNT</td>
+<td>69</td>
+<td>Srmount error</td>
+<td>srmount错误</td>
+</tr>
+<tr>
+<td>ECOMM</td>
+<td>70</td>
+<td>Communication error on send</td>
+<td>发送时的通讯错误</td>
+</tr>
+<tr>
+<td>EPROTO</td>
+<td>71</td>
+<td>Protocol error</td>
+<td>协议错误</td>
+</tr>
+<tr>
+<td>EMULTIHOP</td>
+<td>72</td>
+<td>Multihop attempted</td>
+<td>多跳尝试</td>
+</tr>
+<tr>
+<td>EDOTDOT</td>
+<td>73</td>
+<td>RFS specific error</td>
+<td>RFS特定的错误</td>
+</tr>
+<tr>
+<td>EBADMSG</td>
+<td>74</td>
+<td>Not a data message</td>
+<td>非数据消息</td>
+</tr>
+<tr>
+<td>EOVERFLOW</td>
+<td>75</td>
+<td>Value too large for defined data type</td>
+<td>值太大,对于定义数据类型</td>
+</tr>
+<tr>
+<td>ENOTUNIQ</td>
+<td>76</td>
+<td>Name not unique on network</td>
+<td>名不是唯一的网络</td>
+</tr>
+<tr>
+<td>EBADFD</td>
+<td>77</td>
+<td>File descriptor in bad state</td>
+<td>文件描述符在坏状态</td>
+</tr>
+<tr>
+<td>EREMCHG</td>
+<td>78</td>
+<td>Remote address changed</td>
+<td>远程地址改变了</td>
+</tr>
+<tr>
+<td>ELIBACC</td>
+<td>79</td>
+<td>Cannot access a needed shared library</td>
+<td>无法访问必要的共享库</td>
+</tr>
+<tr>
+<td>ELIBBAD</td>
+<td>80</td>
+<td>Accessing a corrupted shared library</td>
+<td>访问损坏的共享库</td>
+</tr>
+<tr>
+<td>ELIBSCN</td>
+<td>81</td>
+<td>A .lib section in an .out is corrupted</td>
+<td>库段. out损坏</td>
+</tr>
+<tr>
+<td>ELIBMAX</td>
+<td>82</td>
+<td>Linking in too many shared libraries</td>
+<td>试图链接太多的共享库</td>
+</tr>
+<tr>
+<td>ELIBEXEC</td>
+<td>83</td>
+<td>Cannot exec a shared library directly</td>
+<td>不能直接执行一个共享库</td>
+</tr>
+<tr>
+<td>EILSEQ</td>
+<td>84</td>
+<td>Illegal byte sequence</td>
+<td>无效的或不完整的多字节或宽字符</td>
+</tr>
+<tr>
+<td>ERESTART</td>
+<td>85</td>
+<td>Interrupted system call should be restarted</td>
+<td>应该重新启动中断的系统调用</td>
+</tr>
+<tr>
+<td>ESTRPIPE</td>
+<td>86</td>
+<td>Streams pipe error</td>
+<td>流管错误</td>
+</tr>
+<tr>
+<td>EUSERS</td>
+<td>87</td>
+<td>Too many users</td>
+<td>用户太多</td>
+</tr>
+<tr>
+<td>ENOTSOCK</td>
+<td>88</td>
+<td>Socket operation on non-socket</td>
+<td>套接字操作在非套接字上</td>
+</tr>
+<tr>
+<td>EDESTADDRREQ</td>
+<td>89</td>
+<td>Destination address required</td>
+<td>需要目标地址</td>
+</tr>
+<tr>
+<td>EMSGSIZE</td>
+<td>90</td>
+<td>Message too long</td>
+<td>消息太长</td>
+</tr>
+<tr>
+<td>EPROTOTYPE</td>
+<td>91</td>
+<td>Protocol wrong type for socket</td>
+<td>socket协议类型错误</td>
+</tr>
+<tr>
+<td>ENOPROTOOPT</td>
+<td>92</td>
+<td>Protocol not available</td>
+<td>协议不可用</td>
+</tr>
+<tr>
+<td>EPROTONOSUPPORT</td>
+<td>93</td>
+<td>Protocol not supported</td>
+<td>不支持的协议</td>
+</tr>
+<tr>
+<td>ESOCKTNOSUPPORT</td>
+<td>94</td>
+<td>Socket type not supported</td>
+<td>套接字类型不受支持</td>
+</tr>
+<tr>
+<td>EOPNOTSUPP</td>
+<td>95</td>
+<td>Operation not supported on transport</td>
+<td>不支持的操作</td>
+</tr>
+<tr>
+<td>EPFNOSUPPORT</td>
+<td>96</td>
+<td>Protocol family not supported</td>
+<td>不支持的协议族</td>
+</tr>
+<tr>
+<td>EAFNOSUPPORT</td>
+<td>97</td>
+<td>Address family not supported by protocol</td>
+<td>协议不支持的地址</td>
+</tr>
+<tr>
+<td>EADDRINUSE</td>
+<td>98</td>
+<td>Address already in use</td>
+<td>地址已在使用</td>
+</tr>
+<tr>
+<td>EADDRNOTAVAIL</td>
+<td>99</td>
+<td>Cannot assign requested address</td>
+<td>无法分配请求的地址</td>
+</tr>
+<tr>
+<td>ENETDOWN</td>
+<td>100</td>
+<td>Network is down</td>
+<td>网络瘫痪</td>
+</tr>
+<tr>
+<td>ENETUNREACH</td>
+<td>101</td>
+<td>Network is unreachable</td>
+<td>网络不可达</td>
+</tr>
+<tr>
+<td>ENETRESET</td>
+<td>102</td>
+<td>Network dropped</td>
+<td>网络连接丢失</td>
+</tr>
+<tr>
+<td>ECONNABORTED</td>
+<td>103</td>
+<td>Software caused connection</td>
+<td>软件导致连接中断</td>
+</tr>
+<tr>
+<td>ECONNRESET</td>
+<td>104</td>
+<td>Connection reset by</td>
+<td>连接被重置</td>
+</tr>
+<tr>
+<td>ENOBUFS</td>
+<td>105</td>
+<td>No buffer space available</td>
+<td>没有可用的缓冲空间</td>
+</tr>
+<tr>
+<td>EISCONN</td>
+<td>106</td>
+<td>Transport endpoint</td>
+<td>传输端点已经连接</td>
+</tr>
+<tr>
+<td>ENOTCONN</td>
+<td>107</td>
+<td>Transport endpoint</td>
+<td>传输终点没有连接</td>
+</tr>
+<tr>
+<td>ESHUTDOWN</td>
+<td>108</td>
+<td>Cannot send after transport</td>
+<td>传输后无法发送</td>
+</tr>
+<tr>
+<td>ETOOMANYREFS</td>
+<td>109</td>
+<td>Too many references</td>
+<td>太多的参考</td>
+</tr>
+<tr>
+<td>ETIMEDOUT</td>
+<td>110</td>
+<td>Connection timed</td>
+<td>连接超时</td>
+</tr>
+<tr>
+<td>ECONNREFUSED</td>
+<td>111</td>
+<td>Connection refused</td>
+<td>拒绝连接</td>
+</tr>
+<tr>
+<td>EHOSTDOWN</td>
+<td>112</td>
+<td>Host is down</td>
+<td>主机已关闭</td>
+</tr>
+<tr>
+<td>EHOSTUNREACH</td>
+<td>113</td>
+<td>No route to host</td>
+<td>没有主机的路由</td>
+</tr>
+<tr>
+<td>EALREADY</td>
+<td>114</td>
+<td>Operation already</td>
+<td>已运行</td>
+</tr>
+<tr>
+<td>EINPROGRESS</td>
+<td>115</td>
+<td>Operation now in</td>
+<td>正在运行</td>
+</tr>
+<tr>
+<td>ESTALE</td>
+<td>116</td>
+<td>Stale NFS file handle</td>
+<td>陈旧的NFS文件句柄</td>
+</tr>
+<tr>
+<td>EUCLEAN</td>
+<td>117</td>
+<td>Structure needs cleaning</td>
+<td>结构需要清洗</td>
+</tr>
+<tr>
+<td>ENOTNAM</td>
+<td>118</td>
+<td>Not a XENIX-named</td>
+<td>不是XENIX命名的</td>
+</tr>
+<tr>
+<td>ENAVAIL</td>
+<td>119</td>
+<td>No XENIX semaphores</td>
+<td>没有XENIX信号量</td>
+</tr>
+<tr>
+<td>EISNAM</td>
+<td>120</td>
+<td>Is a named type file</td>
+<td>是一个命名的文件类型</td>
+</tr>
+<tr>
+<td>EREMOTEIO</td>
+<td>121</td>
+<td>Remote I/O error</td>
+<td>远程输入/输出错误</td>
+</tr>
+<tr>
+<td>EDQUOT</td>
+<td>122</td>
+<td>Quota exceeded</td>
+<td>超出磁盘配额</td>
+</tr>
+<tr>
+<td>ENOMEDIUM</td>
+<td>123</td>
+<td>No medium found</td>
+<td>没有磁盘被发现</td>
+</tr>
+<tr>
+<td>EMEDIUMTYPE</td>
+<td>124</td>
+<td>Wrong medium type</td>
+<td>错误的媒体类型</td>
+</tr>
+<tr>
+<td>ECANCELED</td>
+<td>125</td>
+<td>Operation Canceled</td>
+<td>取消操作</td>
+</tr>
+<tr>
+<td>ENOKEY</td>
+<td>126</td>
+<td>Required key not available</td>
+<td>所需键不可用</td>
+</tr>
+<tr>
+<td>EKEYEXPIRED</td>
+<td>127</td>
+<td>Key has expired</td>
+<td>关键已过期</td>
+</tr>
+<tr>
+<td>EKEYREVOKED</td>
+<td>128</td>
+<td>Key has been revoked</td>
+<td>关键被撤销</td>
+</tr>
+<tr>
+<td>EKEYREJECTED</td>
+<td>129</td>
+<td>Key was rejected by service</td>
+<td>关键被拒绝服务</td>
+</tr>
+<tr>
+<td>EOWNERDEAD</td>
+<td>130</td>
+<td>Owner died</td>
+<td>所有者死亡</td>
+</tr>
+<tr>
+<td>ENOTRECOVERABLE</td>
+<td>131</td>
+<td>State not recoverable</td>
+<td>状态不可恢复</td>
+</tr>
+<tr>
+<td>ERFKILL</td>
+<td>132</td>
+<td>Operation not possible due to RF-kill</td>
+<td>由于RF-kill而无法操作</td>
+</tr>
+<tr>
+<td>EHWPOISON</td>
+<td>133</td>
+<td>Memory page has hardware error</td>
+<td>内存物理页面硬件错误</td>
+</tr>
+</tbody>
+</table>
+<p>134-255是Unknown error</p>
+<p>也可以通过：<figure class="highlight plain"><figcaption><span>3 errno``` 来查看帮助信息</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">此外，还有几个函数帮助错误信息的获取和输出</span><br><span class="line"></span><br><span class="line">```C</span><br><span class="line">#include &lt;string.&gt;</span><br><span class="line">char *strerror(int errnum);</span><br><span class="line">//该函数把错误代码映射为一个字符串，对错误类型进行说明。</span><br><span class="line"></span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">void perror(const char *s);</span><br><span class="line">//该函数也把errno变量中报告的错误应为到一个字符串，并把它输出到标准错误输出流。</span><br></pre></td></tr></table></figure></p>
+<p>还有error和error_at_line。参见：<a href="https://blog.csdn.net/mill_li/article/details/54314875" target="_blank" rel="noopener">https://blog.csdn.net/mill_li/article/details/54314875</a></p>
+<h2 id="网络接口调用应该如何处理异常"><a href="#网络接口调用应该如何处理异常" class="headerlink" title="网络接口调用应该如何处理异常"></a>网络接口调用应该如何处理异常</h2><table>
+<thead>
+<tr>
+<th>C Name</th>
+<th>Value</th>
+<th>Description</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EINTR</td>
+<td>4</td>
+<td>Interrupted system call</td>
+<td>该操作被系统其它操作中断，需要重复尝试。</td>
+</tr>
+<tr>
+<td>EAGAIN</td>
+<td>11</td>
+<td>try again</td>
+<td>资源暂时不可用。SO_RCVTIMEO和SO_SNDTIMEO会导致read/write函数返回EAGAIN</td>
+</tr>
+<tr>
+<td>EWOULDBLOCK</td>
+<td>41</td>
+<td>would block</td>
+<td>该操作本来应该阻塞的，但是由于本socket为非阻塞的socket，因此立刻返回。</td>
+</tr>
+</tbody>
+</table>
+<p>需要考虑异常错误码的操作：connect, accept, send, recv</p>
+<p>在堵塞模式下，一般只有等到执行成功才会返回结果。但如果设置了SO_RCVTIMEO或SO_SNDTIMEO在超时后，堵塞也会结束，返回EAGAIN异常。</p>
+<pre><code>SO_RCVTIMEO and SO_SNDTIMEO
+
+Specify the receiving or sending timeouts until reporting an error. The argument is a struct timeval. If an input or output function blocks for this period of time, and data has been sent or received, the return value of that function will be the amount of data transferred; if no data has been transferred and the timeout has been reached then -1 is returned witherrno set to EAGAIN or EWOULDBLOCK, or EINPROGRESS (for connect(2)) just as if the socket was specified to be nonblocking. If the timeout is set to zero (the default) then the operation will never timeout. Timeouts only have effect for system calls that perform socket I/O (e.g., read(2), recvmsg(2), send(2), sendmsg(2)); timeouts have no effect for select(2), poll(2), epoll_wait(2), and so on.
+</code></pre><p>非堵塞模式，不管是否执行成功，会立即返回结果，比如read时缓冲区没有内容，write时缓冲区满，遇到这样的情况，可以在下次接着去尝试读取。因此，非堵塞模式需要考虑EWOULDBLOCK异常。</p>
+<p>综上所述：</p>
+<pre><code>在非阻塞模式下，write或read返回-1，errno为EAGAIN，表示相应的操作还没执行完成。
+在阻塞模式下，设置SO_RCVTIMEO和SO_SNDTIMEO会导致read/write函数返回EAGAIN。
+(errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN)的情况下认为连接是正常的
+</code></pre><p>最好的找出如何处理各个API异常的办法应该是用man</p>
+<pre><code>man connect
+man send
+man recv
+</code></pre><p><strong>Demo</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">SendBytes(<span class="keyword">int</span> sockfd, <span class="keyword">char</span> *buf, <span class="keyword">int</span> len, <span class="keyword">int</span> flags)</span><br><span class="line">&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NET_SEND_RETRY 3</span></span><br><span class="line">    <span class="keyword">int</span> loop = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">retry:</span><br><span class="line">    status = send(sockfd, buf, len, flags)</span><br><span class="line">    <span class="keyword">if</span> (status &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">/* If interrupted by signal, just retry */</span></span><br><span class="line">        <span class="keyword">if</span> (errno == EINTR)</span><br><span class="line">            <span class="keyword">goto</span> retry;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* If the socket is full, we will retry NET_SEND_RETRY times. */</span></span><br><span class="line">        <span class="keyword">if</span> ((errno == EAGAIN || errno == EWOULDBLOCK) &amp;&amp; ++loop &lt; NET_SEND_RETRY)</span><br><span class="line">            <span class="keyword">goto</span> retry;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (status &lt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> ((errno == EWOULDBLOCK || errno == EAGAIN) &amp;&amp; (conn-&gt;timeout &gt;= <span class="number">0</span>))</span><br><span class="line">        &#123;</span><br><span class="line">            elog(ERROR, <span class="string">"connection is timeout: %d"</span>, errno);</span><br><span class="line">            <span class="keyword">return</span> status;</span><br><span class="line">        &#125;</span><br><span class="line">        elog(ERROR, <span class="string">"connection is bad: %d"</span>, errno);</span><br><span class="line">        <span class="keyword">return</span> status;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><h3 id="1-O-NONBLOCK与O-NDELAY有何不同"><a href="#1-O-NONBLOCK与O-NDELAY有何不同" class="headerlink" title="1. O_NONBLOCK与O_NDELAY有何不同?"></a>1. O_NONBLOCK与O_NDELAY有何不同?</h3><pre><code>O_NONBLOCK和O_NDELAY所产生的结果都是使I/O变成非阻塞模式(non-blocking)，在读取不到数据或是写入缓冲区已满会马上return，而不会阻塞等待。
+
+它们的差别在于：在读操作时，如果读不到数据，O_NDELAY会使I/O函数马上返回0，但这又衍生出一个问题，因为读取到文件末尾(EOF)时返回的也是0，这样无法区分是哪种情况。因此，O_NONBLOCK就产生出来，它在读取不到数据时会回传-1，并且设置errno为EAGAIN。
+
+O_NDELAY是在System V的早期版本中引入的，在编码时，还是推荐POSIX规定的O_NONBLOCK，O_NONBLOCK可以在open和fcntl时设置。
+</code></pre><h3 id="2-特殊处理"><a href="#2-特殊处理" class="headerlink" title="2. 特殊处理"></a>2. 特殊处理</h3><p>accept被信号中断<br>accept以及套接字上的I/O可能被信号打断，并返回EINTR作为结果，必须处理该返回值并且适当时候再次调用。</p>
+<p>connect被信号中断<br>connect被信号打断，返回EINTR作为结果，不能对该socket再次调用connect，需要使用select等待连接完成。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p><a href="https://www.cnblogs.com/duhuo/articles/4982386.html" target="_blank" rel="noopener">https://www.cnblogs.com/duhuo/articles/4982386.html</a></p>
+<p><a href="https://blog.csdn.net/u013348164/article/details/53730056" target="_blank" rel="noopener">https://blog.csdn.net/u013348164/article/details/53730056</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2019/04/06/linux/linux_errnum_and_netexception/" title="Linux错误代码含义及网络异常处理">https://leapking.github.io/2019/04/06/linux/linux_errnum_and_netexception/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          
+            <a href="/tags/errno/" rel="tag"><i class="fa fa-tag"></i> errno</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/24/database/database_postgresql_pgadmin/" rel="next" title="PostgreSQL-PgAdmin">
+                <i class="fa fa-chevron-left"></i> PostgreSQL-PgAdmin
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/27/database/database_postgresql_xlog1/" rel="prev" title="PostgreSQL流复制一——集群搭建">
+                PostgreSQL流复制一——集群搭建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux错误代码含义及网络异常处理"><span class="nav-number">1.</span> <span class="nav-text">Linux错误代码含义及网络异常处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux错误代码及其含义"><span class="nav-number">1.1.</span> <span class="nav-text">Linux错误代码及其含义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网络接口调用应该如何处理异常"><span class="nav-number">1.2.</span> <span class="nav-text">网络接口调用应该如何处理异常</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FAQ"><span class="nav-number">1.3.</span> <span class="nav-text">FAQ</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-O-NONBLOCK与O-NDELAY有何不同"><span class="nav-number">1.3.1.</span> <span class="nav-text">1. O_NONBLOCK与O_NDELAY有何不同?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-特殊处理"><span class="nav-number">1.3.2.</span> <span class="nav-text">2. 特殊处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">1.3.3.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

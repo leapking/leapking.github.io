@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux,pacemaker," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="收集整理的关于Pacemaker部分资料">
+<meta name="keywords" content="linux,pacemaker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pacemaker学习笔记">
+<meta property="og:url" content="https://leapking.github.io/2018/02/24/linux/linux_pacemaker_notebook/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="收集整理的关于Pacemaker部分资料">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pacemaker学习笔记">
+<meta name="twitter:description" content="收集整理的关于Pacemaker部分资料">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2018/02/24/linux/linux_pacemaker_notebook/"/>
+
+
+
+
+
+  <title>Pacemaker学习笔记 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2018/02/24/linux/linux_pacemaker_notebook/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Pacemaker学习笔记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-24T14:57:40+08:00">
+                2018-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/pacemaker/" itemprop="url" rel="index">
+                    <span itemprop="name">pacemaker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  收集整理的关于Pacemaker部分资料
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>[TOC]</p>
+<h1 id="高可用集群介绍"><a href="#高可用集群介绍" class="headerlink" title="高可用集群介绍"></a>高可用集群介绍</h1><ol>
+<li>pacemaker 简单说明 </li>
+</ol>
+<p>pacemaker(直译：心脏起搏器)，是一个群集资源管理器。它实现较大可用性群集服务（亦称资源管理）的节点和资源级故障检测和恢复使用您的推荐集群基础设施（OpenAIS的或Heaerbeat）提供的消息和成员能力。<br>它可以做乎任何规模的集群，并配备了一个强大的依赖模型，使管理员能够准确地表达群集资源之间的关系（包括顺序和位置）。几乎任何可以编写脚本，可以管理作为心脏起搏器集群的一部分。<br>我再次说明一下，pacemaker是个资源管理器，不是提供心跳信息的，因为它似乎是一个普遍的误解，也是值得的。pacemaker是一个延续的CRM（亦称Heartbeat V2资源管理器），最初是为心跳，但已经成为独立的项目。</p>
+<ol>
+<li><p>pacemaker 由来<br>大家都知道，Heartbeat 到了V3版本后，拆分为多个项目，其中pacemaker就是拆分出来的资源管理器。<br>Heartbeat 3.0拆分之后的组成部分：<br>Heartbeat：将原来的消息通信层独立为heartbeat项目，新的heartbeat只负责维护集群各节点的信息以及它们之前通信；<br>Cluster Glue：相当于一个中间层，它用来将heartbeat和pacemaker关联起来，主要包含2个部分，即为LRM和STONITH。<br>Resource Agent：用来控制服务启停，监控服务状态的脚本集合，这些脚本将被LRM调用从而实现各种资源启动、停止、监控等等。<br>Pacemaker : 也就是Cluster Resource Manager （简称CRM），用来管理整个HA的控制中心，客户端通过pacemaker来配置管理监控整个集群。</p>
+<p> Heartbeat几个重要组件：<br> heartbeat – 节点间通信校验模块<br> CRM - 集群资源管理模块<br> CCM - 维护集群成员的一致性<br> LRM - 本地资源管理模块<br> StonithDaemon - 提供节点重启服务<br> logd - 非阻塞的日志记录<br> apphbd - 提供应用程序级的看门狗计时器<br> Recovery Manager - 应用故障恢复<br> 底层结构–包括插件接口、进程间通信等<br> CTS – 集群测试系统，集群压力测试<br>参见：<a href="https://www.cnblogs.com/chimeiwangliang/p/7975911.html" target="_blank" rel="noopener">https://www.cnblogs.com/chimeiwangliang/p/7975911.html</a></p>
+</li>
+</ol>
+<h1 id="crm资源得分概述"><a href="#crm资源得分概述" class="headerlink" title="crm资源得分概述"></a>crm资源得分概述</h1><p>在V2的Heartbeat中，为了将资源的监控和切换结合起来，同时支持多节点集群，Heartbeat提供了一种积分策略来控制各个资源在集群中各节点之间的切换策略。通过该积分机制，计算出各节点的的总分数， 得分最高者将成为active状态来管理某个（或某组）资源。</p>
+<p>如果在CIB的配置文件中不做出任何配置的话，那么每一个资源的初始分数（resource-stickiness）都会是默认的0，而且每一个资源在每次失败之后所减掉的分数（resource-failure-stickiness）也是0。如此的话，一个资源不论他失败多少次，heartbeat都只是执行restart操作，不会进行节点切换。一般来说，resource-stickiness的值都是正数，resource-failure-stickiness的值都是负数。另外还有一个特殊值那就是正无穷大（INFINITY）和负无穷大 （-INFINITY）。</p>
+<p>如果节点的分数为负分，那么不管什么情况发生，该节点都不会接管资源（冷备节点）。随着资源的各种状态的发生，在各节点上面的分数就会发生变化，随着分数的变化，一旦某节点的分数大于当前运行该资源的节点的分数之后，heartbeat就会做出切换动作，现在运行该资源的节点将释 放资源，分数高出的节点将接管该资源。</p>
+<h2 id="资源得分配置"><a href="#资源得分配置" class="headerlink" title="资源得分配置"></a>资源得分配置</h2><p>资源分：<br>在CIB的配置中，可以给每个资源定义一个分数，通过resource-stickiness来设置，同样也可以设置一个失败后丢失的分数，通过resource-failure-stickiness来设置。<br>除了可以通过给每个资源单独设置两项的分数之外，也可以通过default-resource-stickiness和default-resource-failure-stickiness将所有的resource设置成相同的分数。<br>当然，如果在设置了这个default分数之后，同时也给部分或者全部资源也设置了这两个分数的话，将取单独设置的各个资源设置的分数而不取默认分数。</p>
+<p>节点分：<br>除了资源的分数之外，节点自身同样也有分数，可以用来设定资源优先在哪个节点上运行。</p>
+<h2 id="资源分数计算规则"><a href="#资源分数计算规则" class="headerlink" title="资源分数计算规则"></a>资源分数计算规则</h2><p>在CRM的配置当中，节点通过如下规则计算得分<br>Score=node+resource+failcount*failure</p>
+<p>1.当资源成功在某个节点上启动时，会给该节点加上成功分:default-resource-stickiness<br>2.当资源在某个节点上运行失败时，会给该节点加上失败分:default-resource-failure-stickiness<br>3.当资源无法获取或发生切换时，会减去之前赋给该节点的成功分:default-resource-stickiness</p>
+<p>举例：<br>default-resource-stickiness：100<br>default-resource-failure-stickiness：-100<br>node1:200, node2:150</p>
+<p>a、开始时，两边同时启动heartbeat，两边都没有开始运行这个resource，resource本身没有分数：<br>node1分数：node+resource+failcount<em>failure=200+0+(0</em>(-100))=200<br>node2分数：node+resource+failcount<em>failure=150+0+(0</em>(-100))=150<br>因此heartbeat会在node1上面运行这个资源，然后node1的分数发生变化了，因为有资源自身的分数加入了：<br>node1分数：node+resource+failcount<em>failure=200+100+(0</em>(-100))=300<br>node2分数：node+resource+failcount<em>failure=150+0+(0</em>(-100))=150</p>
+<p>b、运行一段时间后，heartbeat发现这个资源crash了，分数马上会发生变化，如下：<br>node1分数：node+resource+failcount<em>failure=200+100+(1</em>(-100))=200<br>node2分数：node+resource+failcount<em>failure=150+0+(0</em>(-100))=150<br>heartbeat发现node1的分数还是比node2的高，那么资源不会发生迁移，将执行restart操作。</p>
+<p>c、再继续运行一段时间后，heartbeat发现这个资源又有问题了，分数又发生变化了：<br>node1分数：node+resource+failcount<em>failure=200+100+(2</em>(-100))=100<br>node2分数：node+resource+failcount<em>failure=150+0+(0</em>(-100))=150<br>这时候heartbeat发现node2比node1的分数高了，资源将发生迁移，node1释放资源，node2接管资源。这时候分数又会发生变化如下：<br>node1分数：node+resource+failcount<em>failure-resource=200+100+(2</em>(-100))-100=0<br>node2分数：node+resource+failcount<em>failure=150+100+(0</em>(-100))=250</p>
+<p>该资源在node2上面出现三次问题以后，那么node2的分数将变成-50，又比node1少了，资源将迁移回node1。<br>node1分数将变成100，而node2的分数将变成-150（因为又少了资源所有者的那100分）。到这里，node2节点的分数已经是负数了。</p>
+<p>由于资源永远都不会迁移到一个分数为负的节点上去，从这以后node1节点上面不管这个资源失败多少次，都不会再迁移到node2了。<br>一个节点的分数会在该节点的heartbeat重启之后被重置为初始状态。<br>或者通过相关命令来对集群中某个节点的某个资源或者资源组来重置或者查看其failcount，如下：<br>crm_failcount -G -U node1 -r mysql #查看node1上面的mysql资源的failcount<br>crm_failcount -D -U node1 -r mysql #重置node1上面的mysql资源的failcount</p>
+<p>组资源计算：<br>当然，在实际应用中，我们一般都是将某一些互相关联的资源放到一起组成一个资源组，一旦资源组中某资源有问题的时候，需要迁移整个资源组的资源。这个和上面针对单个资源的情况实际上没有太多区别，只需要将resource-stickiness和resource-failure-stickiness设置到组里即可。<br>这样，在该资源组中任何一个资源出现问题之后，都会被认为该资源组有问题，当分数低于其他节点出现切换的时候就是整个资源组的切换。</p>
+<p>另外，对于INFINITY和-INFINITY这两个值，实际上主要用途就是为了控制永远不切换和只要失败必须切换用的。因为代表的意思就是拥有正无穷大的分数和失败就到负无穷大，主要用来满足极端规则的简单配置项。</p>
+<p>总的来说，一项资源（或者资源组）在一个节点运行迁移到另一个节点之前，可以失败的次数的计算公式可以如下表示：<br>(nodeA score - nodeB score + stickiness)/abs(failure stickiness)，即为A节点分数减去B节点分数，再加上资源运行分数后得到的总分数，除以资源失败分数的绝对值。</p>
+<p>多资源组单资源的得分计算<br>资源组内的资源得分计算是相对独立的，但是资源是否切换依旧依据资源组与资源组之间的分数总和进行判断。<br>多资源组多资源的得分计算<br>资源要切换不再以单个资源的分数来比较. 而是以该资源组的N个资源SCORE之和。</p>
+<h1 id="配置文件介绍"><a href="#配置文件介绍" class="headerlink" title="配置文件介绍"></a>配置文件介绍</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">ha.cf</span><br><span class="line">debugfile /var/log/ha-debug       #用于记录heartbeat的调试信息  </span><br><span class="line">logfile /var/log/ha-log           #用于记录heartbeat的日志信息  </span><br><span class="line">logfacility local0                #系统日志级别  </span><br><span class="line">keepalive 2                       #设定心跳(监测)间隔时间，默认单位为秒  </span><br><span class="line">warntime 10                       #＃警告时间，通常为deadtime时间的一半  </span><br><span class="line">deadtime 30                       # 超出30秒未收到对方节点的心跳，则认为对方已经死亡  </span><br><span class="line">initdead 120                      #网络启动时间，至少为deadtime的两倍。  </span><br><span class="line">hopfudge 1                        #可选项：用于环状拓扑结构,在集群中总共跳跃节点的数量  </span><br><span class="line">udpport 694                       #使用udp端口694 进行心跳监测  </span><br><span class="line">ucast eth1 192.168.9.6            #采用单播，进行心跳监测，IP为对方主机IP  </span><br><span class="line">auto_failback on                  #on表示当拥有该资源的属主恢复之后，资源迁移到属主上  </span><br><span class="line">node srv5.localdomain             #设置集群中的节点，节点名须与uname –n相匹配  </span><br><span class="line">node srv6.localdomain             #节点2  </span><br><span class="line">ping 192.168.8.2 192.168.9.7      #ping集群以外的节点，这里是网关和另一台机器，用于检测网络的连接性  </span><br><span class="line">respawn root /usr/lib/heartbeat/ipfail  </span><br><span class="line">apiauth ipfail gid=root uid=root  #设置所指定的启动进程的权限</span><br></pre></td></tr></table></figure>
+<h1 id="工具介绍"><a href="#工具介绍" class="headerlink" title="工具介绍"></a>工具介绍</h1><p>资源管理：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">crm_mon             #监控资源</span><br><span class="line">crm resource show   #查看资源</span><br><span class="line">crm resource start  &#123;ResourceName&#125; #启动资源</span><br><span class="line">crm resource stop   &#123;ResourceName&#125; #停止资源</span><br><span class="line">crm resource move   &#123;ResourceName&#125; #迁移资源，迁移后会在配置里设置一个位置规则</span><br><span class="line">crm resource unmove &#123;ResourceName&#125; #取消迁移，取消move时设置的位置规则（资源不会移动到原来位置）</span><br></pre></td></tr></table></figure></p>
+<p>节点管理：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">crm node standby &#123;NodeName&#125; #将某个节点离线</span><br><span class="line">crm node online &#123;NodeName&#125;  #将离线节点上线</span><br></pre></td></tr></table></figure></p>
+<p>所有工具：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">crm_verify           --校验集群配置文件</span><br><span class="line">crm_uuid             --查看节点的uuid</span><br><span class="line">crm_standby          --操作节点的备用属性以确定资源是否可在此节点上运行 </span><br><span class="line">crm_resource         --资源管理工具</span><br><span class="line">crm_mon              --集群健康状态监控</span><br><span class="line">crm_master           --管理主/从属资源的自选设置，以在给定节点上提升</span><br><span class="line">crm_failcount        --管理记录每个资源的故障计数的计数器。</span><br><span class="line">crm_diff             --识别对群集配置所做的更改，并将增补程序应用到配置文件</span><br><span class="line">crm_attribute        --允许查询、修改和删除节点属性和群集选项。</span><br><span class="line">crmadmin             --控制群集资源管理器</span><br><span class="line">crm_sh               --crm命令提示符下的工具集</span><br><span class="line">cibadmin             --提供对群集配置的直接访问</span><br></pre></td></tr></table></figure></p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p><a href="http://blog.itpub.net/703656/viewspace-1029075/" target="_blank" rel="noopener">http://blog.itpub.net/703656/viewspace-1029075/</a><br><a href="http://blog.itpub.net/703656/viewspace-1028999/" target="_blank" rel="noopener">http://blog.itpub.net/703656/viewspace-1028999/</a><br><a href="http://blog.itpub.net/703656/viewspace-1029001/" target="_blank" rel="noopener">http://blog.itpub.net/703656/viewspace-1029001/</a><br><a href="http://www.linux-ha.org/wiki/Sfex_(resource_agent)" target="_blank" rel="noopener">http://www.linux-ha.org/wiki/Sfex_(resource_agent)</a><br><a href="http://master.packages.lcfg.ucs.ed.ac.uk/pkgs/devolved/world/sl6_64/rpms/pacemaker-libs-devel-1.1.6-1.el6.see.x86_64.rpm.txt" target="_blank" rel="noopener">http://master.packages.lcfg.ucs.ed.ac.uk/pkgs/devolved/world/sl6_64/rpms/pacemaker-libs-devel-1.1.6-1.el6.see.x86_64.rpm.txt</a></p>
+<p>Pacemaker Buglist:<br>    <a href="https://bugs.clusterlabs.org/describecomponents.cgi?product=Pacemaker" target="_blank" rel="noopener">https://bugs.clusterlabs.org/describecomponents.cgi?product=Pacemaker</a><br>Linux-HA Buglist:<br>    <a href="https://developerbugs.linuxfoundation.org" target="_blank" rel="noopener">https://developerbugs.linuxfoundation.org</a><br>ClusterLabs:<br>    <a href="https://github.com/ClusterLabs" target="_blank" rel="noopener">https://github.com/ClusterLabs</a><br>    <a href="http://clusterlabs.org/" target="_blank" rel="noopener">http://clusterlabs.org/</a><br>Linux-HA User’s Guide<br>    <a href="http://www.linux-ha.org/doc/users-guide/users-guide.html" target="_blank" rel="noopener">http://www.linux-ha.org/doc/users-guide/users-guide.html</a><br>源码下载地址<br>    <a href="http://linux-ha.org/wiki/Download" target="_blank" rel="noopener">http://linux-ha.org/wiki/Download</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2018/02/24/linux/linux_pacemaker_notebook/" title="Pacemaker学习笔记">https://leapking.github.io/2018/02/24/linux/linux_pacemaker_notebook/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          
+            <a href="/tags/pacemaker/" rel="tag"><i class="fa fa-tag"></i> pacemaker</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/18/database/database_postgresql_dir_struct/" rel="next" title="PostgreSQL目录结构">
+                <i class="fa fa-chevron-left"></i> PostgreSQL目录结构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/25/tools_use_fb0_flush_screen/" rel="prev" title="【非原创】利用fb0刷屏小程序">
+                【非原创】利用fb0刷屏小程序 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#高可用集群介绍"><span class="nav-number">1.</span> <span class="nav-text">高可用集群介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#crm资源得分概述"><span class="nav-number">2.</span> <span class="nav-text">crm资源得分概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#资源得分配置"><span class="nav-number">2.1.</span> <span class="nav-text">资源得分配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#资源分数计算规则"><span class="nav-number">2.2.</span> <span class="nav-text">资源分数计算规则</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置文件介绍"><span class="nav-number">3.</span> <span class="nav-text">配置文件介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#工具介绍"><span class="nav-number">4.</span> <span class="nav-text">工具介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

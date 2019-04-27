@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="postgres,datastruct," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="Postgresql的源码目录结构，安装目录结构，数据目录结构。">
+<meta name="keywords" content="postgres,datastruct">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PostgreSQL目录结构">
+<meta property="og:url" content="https://leapking.github.io/2018/02/18/database/database_postgresql_dir_struct/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="Postgresql的源码目录结构，安装目录结构，数据目录结构。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PostgreSQL目录结构">
+<meta name="twitter:description" content="Postgresql的源码目录结构，安装目录结构，数据目录结构。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2018/02/18/database/database_postgresql_dir_struct/"/>
+
+
+
+
+
+  <title>PostgreSQL目录结构 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2018/02/18/database/database_postgresql_dir_struct/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">PostgreSQL目录结构</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-18T12:22:04+08:00">
+                2018-02-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/" itemprop="url" rel="index">
+                    <span itemprop="name">database</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/database/postgres/" itemprop="url" rel="index">
+                    <span itemprop="name">postgres</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  Postgresql的源码目录结构，安装目录结构，数据目录结构。
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PostgreSQL目录结构"><a href="#PostgreSQL目录结构" class="headerlink" title="PostgreSQL目录结构"></a>PostgreSQL目录结构</h1><h2 id="源码目录结构"><a href="#源码目录结构" class="headerlink" title="源码目录结构"></a>源码目录结构</h2><p>介绍一下几个比较重要的源码目录。</p>
+<h3 id="源码根目录"><a href="#源码根目录" class="headerlink" title="源码根目录"></a>源码根目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">postgres@raspberrypi:~ $ tree -L 1 postgresql</span><br><span class="line">postgresql</span><br><span class="line">├── aclocal.m4</span><br><span class="line">├── config</span><br><span class="line">├── config.log</span><br><span class="line">├── config.status</span><br><span class="line">├── configure</span><br><span class="line">├── configure.in    #configure模板文件</span><br><span class="line">├── contrib         #扩展插件目录</span><br><span class="line">├── COPYRIGHT       #版权信息</span><br><span class="line">├── doc             #帮助手册文档目录</span><br><span class="line">├── GNUmakefile</span><br><span class="line">├── GNUmakefile.in</span><br><span class="line">├── HISTORY         #历史信息</span><br><span class="line">├── Makefile        #makefile模板文件</span><br><span class="line">├── README          #简单说明</span><br><span class="line">├── README.git      #简单说明</span><br><span class="line">└── src             #源码目录</span><br></pre></td></tr></table></figure>
+<h3 id="contrib扩展插件目录"><a href="#contrib扩展插件目录" class="headerlink" title="contrib扩展插件目录"></a>contrib扩展插件目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">postgres@raspberrypi:~ $ tree -L 1 postgresql/contrib/</span><br><span class="line">postgresql/contrib/</span><br><span class="line">├── adminpack</span><br><span class="line">├── amcheck</span><br><span class="line">├── auth_delay</span><br><span class="line">├── auto_explain</span><br><span class="line">├── bloom</span><br><span class="line">├── btree_gin</span><br><span class="line">├── btree_gist</span><br><span class="line">├── citext</span><br><span class="line">├── contrib-global.mk</span><br><span class="line">├── cube</span><br><span class="line">├── dblink</span><br><span class="line">├── dict_int</span><br><span class="line">├── dict_xsyn</span><br><span class="line">├── earthdistance</span><br><span class="line">├── file_fdw</span><br><span class="line">├── fuzzystrmatch</span><br><span class="line">├── hstore</span><br><span class="line">├── hstore_plperl</span><br><span class="line">├── hstore_plpython</span><br><span class="line">├── intagg</span><br><span class="line">├── intarray</span><br><span class="line">├── isn</span><br><span class="line">├── lo</span><br><span class="line">├── ltree</span><br><span class="line">├── ltree_plpython</span><br><span class="line">├── Makefile</span><br><span class="line">├── oid2name</span><br><span class="line">├── pageinspect</span><br><span class="line">├── passwordcheck</span><br><span class="line">├── pg_buffercache</span><br><span class="line">├── pgcrypto</span><br><span class="line">├── pg_freespacemap</span><br><span class="line">├── pg_prewarm</span><br><span class="line">├── pgrowlocks</span><br><span class="line">├── pg_standby</span><br><span class="line">├── pg_stat_statements</span><br><span class="line">├── pgstattuple</span><br><span class="line">├── pg_trgm</span><br><span class="line">├── pg_visibility</span><br><span class="line">├── postgres_fdw</span><br><span class="line">├── README</span><br><span class="line">├── seg</span><br><span class="line">├── sepgsql</span><br><span class="line">├── spi</span><br><span class="line">├── sslinfo</span><br><span class="line">├── start-scripts</span><br><span class="line">├── tablefunc</span><br><span class="line">├── tcn</span><br><span class="line">├── test_decoding</span><br><span class="line">├── tsm_system_rows</span><br><span class="line">├── tsm_system_time</span><br><span class="line">├── unaccent</span><br><span class="line">├── uuid-ossp</span><br><span class="line">├── vacuumlo</span><br><span class="line">└── xml2</span><br></pre></td></tr></table></figure>
+<h3 id="src源码目录"><a href="#src源码目录" class="headerlink" title="src源码目录"></a>src源码目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">postgres@raspberrypi:~ $ tree -L 1 postgresql/src/</span><br><span class="line">postgresql/src/</span><br><span class="line">├── backend            #内核源码Ｃ文件目录</span><br><span class="line">├── bin                #工具源码目录</span><br><span class="line">├── common             #服务器与客户端公用源码目录</span><br><span class="line">├── DEVELOPERS</span><br><span class="line">├── fe_utils           #前端公用代码</span><br><span class="line">├── include            #内核源码Ｈ文件目录</span><br><span class="line">├── interfaces         #前端接口相关代码</span><br><span class="line">├── Makefile</span><br><span class="line">├── Makefile.global</span><br><span class="line">├── Makefile.global.in</span><br><span class="line">├── Makefile.port -&gt; ../src/makefiles/Makefile.linux</span><br><span class="line">├── makefiles</span><br><span class="line">├── Makefile.shlib</span><br><span class="line">├── nls-global.mk</span><br><span class="line">├── pl                 #存储过程相关代码</span><br><span class="line">├── port               #平台移植相关的代码</span><br><span class="line">├── template           #平台相关的设置值</span><br><span class="line">├── test               #各种测试相关代码</span><br><span class="line">├── timezone           #时区相关代码</span><br><span class="line">├── tools              #开发过程中辅助工具</span><br><span class="line">└── tutorial           #教程</span><br></pre></td></tr></table></figure>
+<h3 id="backend内核源码目录"><a href="#backend内核源码目录" class="headerlink" title="backend内核源码目录"></a>backend内核源码目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">postgres@raspberrypi:~ $ tree -L 1 postgresql/src/backend</span><br><span class="line">postgresql/src/backend</span><br><span class="line">├── access         #各种对象的存取方法模块</span><br><span class="line">├── bootstrap      #模板库创建模块</span><br><span class="line">├── catalog        #系统表操作模块</span><br><span class="line">├── commands       #DML以外的命令相关模块</span><br><span class="line">├── common.mk</span><br><span class="line">├── executor       #查询执行器模块</span><br><span class="line">├── foreign        #外键，引用，mapping相关模块</span><br><span class="line">├── lib            #服务器端各模块公用库模块</span><br><span class="line">├── libpq          #客户端与服务器通信模块</span><br><span class="line">├── main           #主程序模块</span><br><span class="line">├── Makefile</span><br><span class="line">├── nls.mk</span><br><span class="line">├── nodes          #各种树型结构的节点链表模块</span><br><span class="line">├── optimizer      #查询优化器模块</span><br><span class="line">├── parser         #查询编译器模块</span><br><span class="line">├── po             #语言相关模块</span><br><span class="line">├── port           #平台兼容性相关模块</span><br><span class="line">├── postgres       #服务进程模块</span><br><span class="line">├── postmaster     #守护进程模块，监听用户链接并fork服务进程</span><br><span class="line">├── regex          #正则表达式模块</span><br><span class="line">├── replication    #流复制模块</span><br><span class="line">├── rewrite        #查询重写模块</span><br><span class="line">├── snowball       #全文检索相关（语干处理）</span><br><span class="line">├── statistics     #统计信息模块</span><br><span class="line">├── storage        #存储层模块</span><br><span class="line">├── tcop           #查询编译，优化，重写，执行等的调度模块</span><br><span class="line">├── tsearch        #全文检索模块</span><br><span class="line">└── utils          #初始化，报错，内存管理，存储管理，排序，Hash等功能模块</span><br></pre></td></tr></table></figure>
+<h2 id="安装目录结构"><a href="#安装目录结构" class="headerlink" title="安装目录结构"></a>安装目录结构</h2><p>PostgreSQL的安装目录默认在（/usr/local）目录下：</p>
+<table>
+<thead>
+<tr>
+<th>目录</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bin</td>
+<td>二进制可执行文件的目录</td>
+</tr>
+<tr>
+<td>include</td>
+<td>头文件的目录</td>
+</tr>
+<tr>
+<td>lib</td>
+<td>动态库函数</td>
+</tr>
+<tr>
+<td>share</td>
+<td>文档信息和配置文件模板文件等</td>
+</tr>
+</tbody>
+</table>
+<h2 id="数据目录结构"><a href="#数据目录结构" class="headerlink" title="数据目录结构"></a>数据目录结构</h2><p>一般我们使用环境变量PGDATA指向数据目录的根目录，他是在数据库安装的时候指定的。该目录的初始化时通过initdb来完成的。</p>
+<h3 id="根目录介绍"><a href="#根目录介绍" class="headerlink" title="根目录介绍"></a>根目录介绍</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">data</span><br><span class="line">├── base                 # use to store database file</span><br><span class="line">├── global               # under global, all the filenode is hard-code(select oid,relname,relfilenode from pg_class where relfilenode=0 order by oid;)</span><br><span class="line">├── pg_clog              # dir of transaction commit log</span><br><span class="line">│   └── 0000</span><br><span class="line">├── pg_commit_ts</span><br><span class="line">├── pg_dynshmem</span><br><span class="line">├── pg_hba.conf          # client authentication config file</span><br><span class="line">├── pg_ident.conf        # user ident map file</span><br><span class="line">├── pg_logical</span><br><span class="line">│   ├── mappings</span><br><span class="line">│   └── snapshots</span><br><span class="line">├── pg_multixact         # 行级共享锁功能实现基础，记录事务状态信息</span><br><span class="line">│   ├── members</span><br><span class="line">│   │   └── 0000</span><br><span class="line">│   └── offsets</span><br><span class="line">│       └── 0000</span><br><span class="line">├── pg_notify            # 监听状态的数据</span><br><span class="line">│   └── 0000</span><br><span class="line">├── pg_replslot</span><br><span class="line">├── pg_serial            # 已经提交的可串行化的事务的数据</span><br><span class="line">├── pg_snapshots         # dir of snapshot file</span><br><span class="line">├── pg_stat</span><br><span class="line">├── pg_stat_tmp          # dir of tmp stat file</span><br><span class="line">│   ├── db_0.stat</span><br><span class="line">│   ├── db_12407.stat</span><br><span class="line">│   ├── db_16384.stat</span><br><span class="line">│   └── global.stat</span><br><span class="line">├── pg_subtrans          # 子事务信息存放目录</span><br><span class="line">│   └── 0000</span><br><span class="line">├── pg_tblspc            # 存储的是指向用户自己建立的表空间实际目录的链接文件</span><br><span class="line">├── pg_twophase          # 使用两阶段提交功能时分布式事务的存储目录</span><br><span class="line">├── PG_VERSION           # version file</span><br><span class="line">├── pg_xlog              # dir of wal file</span><br><span class="line">│   ├── 000000010000000000000001</span><br><span class="line">│   └── archive_status   # status info of xlog archive</span><br><span class="line">├── postgresql.auto.conf</span><br><span class="line">├── postgresql.conf      # config file of postmaster progress</span><br><span class="line">├── postmaster.opts</span><br><span class="line">└── postmaster.pid       # pid file of postmaster progress</span><br></pre></td></tr></table></figure>
+<h3 id="global目录介绍"><a href="#global目录介绍" class="headerlink" title="global目录介绍"></a>global目录介绍</h3><p>global名如其意，存放的文件用于存储全局的系统表信息和全局控制信息。</p>
+<p>global下有四种文件：</p>
+<ol>
+<li>pg_control<br> 用于存储全局控制信息</li>
+<li>pg_filenode.map<br> 用于将当前目录下系统表的OID与具体文件名进行硬编码映射（每个用户创建的数据库目录下也有同名文件）。</li>
+<li>pg_internal.init<br> 用于缓存系统表，加快系统表读取速度（每个用户创建的数据库目录下也有同名文件）。</li>
+<li>全局系统表文件<br> 数字命名的文件，用于存储系统表的内容。它们在pg_class里的relfilenode都为0，是靠pg_filenode.map将OID与文件硬编码映射。（注：不是所有的系统表的relfilenode都为0）</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">data</span><br><span class="line">├── global                # under global, all the filenode is hard-code(select oid,relname,relfilenode from pg_class where relfilenode=0 order by oid;)</span><br><span class="line">│   ├── 1136              # pg_pltemplate</span><br><span class="line">│   ├── 1137              # pg_pltemplate_name_index</span><br><span class="line">│   ├── 1213              # pg_tablespace</span><br><span class="line">│   ├── 1214              # pg_shdepend</span><br><span class="line">│   ├── 1232              # pg_shdepend_depender_index</span><br><span class="line">│   ├── 1233              # pg_shdepend_reference_index</span><br><span class="line">│   ├── 1260              # pg_authid</span><br><span class="line">│   ├── 1261              # pg_auth_members</span><br><span class="line">│   ├── 1262              # pg_database</span><br><span class="line">│   ├── 2396              # pg_shdescription</span><br><span class="line">│   ├── 2397              # pg_shdescription_o_c_index</span><br><span class="line">│   ├── 2671              # pg_database_datname_index</span><br><span class="line">│   ├── 2672              # pg_database_oid_index</span><br><span class="line">│   ├── 2676              # pg_authid_rolname_index</span><br><span class="line">│   ├── 2677              # pg_authid_oid_index</span><br><span class="line">│   ├── 2694              # pg_auth_members_role_member_index</span><br><span class="line">│   ├── 2695              # pg_auth_members_member_role_index</span><br><span class="line">│   ├── 2697              # pg_tablespace_oid_index</span><br><span class="line">│   ├── 2698              # pg_tablespace_spcname_index</span><br><span class="line">│   ├── 2846              # pg_toast_2396</span><br><span class="line">│   ├── 2847              # pg_toast_2396_index</span><br><span class="line">│   ├── 2964              # pg_db_role_setting</span><br><span class="line">│   ├── 2965              # pg_db_role_setting_databaseid_rol_index</span><br><span class="line">│   ├── 2966              # pg_toast_2964</span><br><span class="line">│   ├── 2967              # pg_toast_2964_index</span><br><span class="line">│   ├── 3592              # pg_shseclabel</span><br><span class="line">│   ├── 3593              # pg_shseclabel_object_index</span><br><span class="line">│   ├── 4060              # pg_toast_3592x</span><br><span class="line">│   ├── 4061              # pg_toast_3592_index</span><br><span class="line">│   ├── 6000              # pg_replication_origin</span><br><span class="line">│   ├── 6001              # pg_replication_origin_roiident_index</span><br><span class="line">│   ├── 6002              # pg_replication_origin_roname_index</span><br><span class="line">│   ├── pg_control        # global control file, use pgcheck -pc to see it.</span><br><span class="line">│   ├── pg_filenode.map   # system table (oid -&gt; filenode) mapping file, use pgcheck -pm to see it.</span><br><span class="line">│   └── pg_internal.init  # system table cache file, use pgcheck -pr to see it.</span><br></pre></td></tr></table></figure>
+<h3 id="base目录介绍"><a href="#base目录介绍" class="headerlink" title="base目录介绍"></a>base目录介绍</h3><p>base目录用于存放数据库的所有实体文件。例如，我们创建的第一个库testdb的OID为16384，那么在data/base下就会产生一个名为16384的目录，用于存储testdb的数据文件。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select oid,datname from pg_database;</span><br><span class="line">  oid  |  datname</span><br><span class="line"><span class="comment">-------+-----------</span></span><br><span class="line"> 12407 | postgres</span><br><span class="line"> 16384 | testdb</span><br><span class="line">     1 | template1</span><br><span class="line"> 12406 | template0</span><br><span class="line">(4 rows)</span><br></pre></td></tr></table></figure>
+<p>base目录结构</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">data</span><br><span class="line">├── base                  # use to store database file(SELECT oid, datname FROM pg_database;)</span><br><span class="line">│   ├── 1                 # template database</span><br><span class="line">│   ├── 12406             # template0 database</span><br><span class="line">│   ├── 12407             # postgres database</span><br><span class="line">│   └── 16384             # testdb, first user database</span><br><span class="line">│   │   ├── 3600</span><br><span class="line">│   │   ├── 3600_fsm</span><br><span class="line">│   │   ├── 3600_vm</span><br><span class="line">│   │   ├── 16385</span><br><span class="line">│   │   ├── pg_filenode.map</span><br><span class="line">│   │   ├── pg_internal.init</span><br><span class="line">│   │   └── PG_VERSION</span><br></pre></td></tr></table></figure>
+<ol>
+<li>pg_filenode.map 是pg_class里relfilenode为0的系统表，OID与文件的硬编码映射。</li>
+<li>pg_internal.init 是系统表的cache文件，用于加快读取。默认不存在，查询系统表后自动产生。</li>
+<li>PG_VERSION 是当前数据库数据格式对应的版本号</li>
+<li>其它文件是需要到pg_class里根据OID查到对应的relfilenode来与文件名匹配的。例如：tab1的relfilenode是16385，那么16385这个文件就是tab1的数据文件</li>
+</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select oid,relfilenode,relname from pg_class where relname='tab1';</span><br><span class="line">  oid  | relfilenode | relname</span><br><span class="line"><span class="comment">-------+-------------+---------</span></span><br><span class="line"> 16385 |       16385 | tab1</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<ol>
+<li><p>空闲空间映射表<br> 名字以_fsm结尾的文件是数据文件对应的FSM(free space map)文件，用map方式来标识哪些block是空闲的。用一个Byte而不是bit来标识一个block。对于一个有N个字节的block，它在_fsm文件中第blknum个字节中记录的值是(31+N)/32。通过这种方式标识一个block空闲字节数。FSM中不是简单的数组，而是一个三层的树形结构。FSM文件是在需要用到它时才自动产生的。</p>
+</li>
+<li><p>可见性映射表文件<br> 名字以_vm结尾的文件是数据文件对应的VM(visibility map)。PostgreSQL中在做多版本并发控制时是通过在元组头上标识“已无效”来实现删除或更新的，最后通过VACUUM功能来清理无效数据回收空闲空间。在做VACUUM时就使用VM开快速查找包含无效元组的block。VM仅是个简单的bitmap,一个bit对应一个block。</p>
+</li>
+</ol>
+<p><strong>注：</strong>系统表分为全局系统表和库级系统表。<br>全局系统表位于global下，例如：pg_database,pg_tablespace,pg_auth_members这种存储系统级对象的表。<br>库级系统表位于数据库目录下，例如：pg_type,pg_proc,pg_attribute这种存储库级对象的表。<br>值得注意的是pg_class位于库级目录的里，但也包含全局系统表信息，因此研发或运维人员在改动全局系统表信息时需要注意。</p>
+<h3 id="表空间目录介绍"><a href="#表空间目录介绍" class="headerlink" title="表空间目录介绍"></a>表空间目录介绍</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">testdb=# select oid,* from pg_tablespace;</span><br><span class="line">  oid  |  spcname   | spcowner | spcacl | spcoptions</span><br><span class="line"><span class="comment">-------+------------+----------+--------+------------</span></span><br><span class="line">  1663 | pg_default |       10 |        |</span><br><span class="line">  1664 | pg_global  |       10 |        |</span><br><span class="line"> 49162 | dbspace    |       10 |        |</span><br><span class="line">(3 rows)</span><br></pre></td></tr></table></figure>
+<p>每一个Oid都在data/pg_tblspc下对应一个名为Oid的软链接文件，指向真正的space目录。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"> tree ../data/pg_tblspc/</span><br><span class="line">../data/pg_tblspc/</span><br><span class="line">└── 49162 -&gt; /home/postgres/postgresql-9.6.6/postgres/data/dbspace</span><br></pre></td></tr></table></figure>
+<p>在space目录是如何组织的呢？</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">testdb=# create table tab3(a int) tablespace dbspace;</span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span></span><br><span class="line"></span><br><span class="line">testdb=# <span class="keyword">select</span> <span class="keyword">oid</span>,relname,relfilenode <span class="keyword">from</span> pg_class <span class="keyword">where</span> relname=<span class="string">'tab3'</span>;</span><br><span class="line">  oid  | relname | relfilenode</span><br><span class="line"><span class="comment">-------+---------+-------------</span></span><br><span class="line"> 57351 | tab3    |       57351</span><br><span class="line">(1 row)</span><br></pre></td></tr></table></figure>
+<p>表空间下的目录结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> tree ../data/pg_tblspc/49162</span><br><span class="line">../data/pg_tblspc/49162          #表空间OID命名的目录</span><br><span class="line">└── PG_9.6_201608131             #版本信息命名的目录</span><br><span class="line">    └── 16384                    #数据库OID命名的目录</span><br><span class="line">        └── 57351                #表OID命名的数据文件</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2018/02/18/database/database_postgresql_dir_struct/" title="PostgreSQL目录结构">https://leapking.github.io/2018/02/18/database/database_postgresql_dir_struct/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/postgres/" rel="tag"><i class="fa fa-tag"></i> postgres</a>
+          
+            <a href="/tags/datastruct/" rel="tag"><i class="fa fa-tag"></i> datastruct</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/17/tools_windows_virtual_wifi/" rel="next" title="Windows上虚拟WIFI">
+                <i class="fa fa-chevron-left"></i> Windows上虚拟WIFI
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/24/linux/linux_pacemaker_notebook/" rel="prev" title="Pacemaker学习笔记">
+                Pacemaker学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PostgreSQL目录结构"><span class="nav-number">1.</span> <span class="nav-text">PostgreSQL目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#源码目录结构"><span class="nav-number">1.1.</span> <span class="nav-text">源码目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#源码根目录"><span class="nav-number">1.1.1.</span> <span class="nav-text">源码根目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#contrib扩展插件目录"><span class="nav-number">1.1.2.</span> <span class="nav-text">contrib扩展插件目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#src源码目录"><span class="nav-number">1.1.3.</span> <span class="nav-text">src源码目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#backend内核源码目录"><span class="nav-number">1.1.4.</span> <span class="nav-text">backend内核源码目录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装目录结构"><span class="nav-number">1.2.</span> <span class="nav-text">安装目录结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据目录结构"><span class="nav-number">1.3.</span> <span class="nav-text">数据目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#根目录介绍"><span class="nav-number">1.3.1.</span> <span class="nav-text">根目录介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#global目录介绍"><span class="nav-number">1.3.2.</span> <span class="nav-text">global目录介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#base目录介绍"><span class="nav-number">1.3.3.</span> <span class="nav-text">base目录介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#表空间目录介绍"><span class="nav-number">1.3.4.</span> <span class="nav-text">表空间目录介绍</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>

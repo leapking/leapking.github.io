@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux,memory," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="详细描述了linux进程的内存结构和内存泄露的知识">
+<meta name="keywords" content="linux,memory">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux 进程的内存结构">
+<meta property="og:url" content="https://leapking.github.io/2018/10/08/linux/linux_process_memory_struct/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="详细描述了linux进程的内存结构和内存泄露的知识">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_01.png">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_02.gif">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_03.png">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_04.jpg">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_05.jpg">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_06.jpg">
+<meta property="og:image" content="https://leapking.github.io/images/process_struct_07.jpg">
+<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="linux 进程的内存结构">
+<meta name="twitter:description" content="详细描述了linux进程的内存结构和内存泄露的知识">
+<meta name="twitter:image" content="https://leapking.github.io/images/process_struct_01.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2018/10/08/linux/linux_process_memory_struct/"/>
+
+
+
+
+
+  <title>linux 进程的内存结构 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description"></h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2018/10/08/linux/linux_process_memory_struct/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">linux 进程的内存结构</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-08T21:57:40+08:00">
+                2018-10-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/linux/" itemprop="url" rel="index">
+                    <span itemprop="name">linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  详细描述了linux进程的内存结构和内存泄露的知识
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h1><p>文本主要介绍一个进程对内存使用方面的知识，从下到上分为如下几个层次：</p>
+<ol>
+<li>操作系统内存管理</li>
+<li>进程的内存结构</li>
+<li>glibc对内存的分配方式</li>
+<li>内存监控</li>
+<li>内存泄露</li>
+</ol>
+<h2 id="1-操作系统内存管理"><a href="#1-操作系统内存管理" class="headerlink" title="1 操作系统内存管理"></a>1 操作系统内存管理</h2><p>请查阅Linux内核相关资料</p>
+<h2 id="2-进程的内存结构"><a href="#2-进程的内存结构" class="headerlink" title="2 进程的内存结构"></a>2 进程的内存结构</h2><h3 id="2-1-基本概念"><a href="#2-1-基本概念" class="headerlink" title="2.1 基本概念"></a>2.1 基本概念</h3><ol>
+<li>多任务操作系统通过使用虚拟地址空间的抽象技术，向每个进程提供相同的系统视图。使进程不必关心自己应该使用哪一块物理内存，从而使得多个进程可以同时运行。</li>
+<li>每个进程都运行在属于自己的虚拟地址空间中，与其他进程互相隔离，其访问内存使用的是虚拟地址，不是真正的物理地址。</li>
+<li>虚拟地址通过进程上的页表(Page Table)映射到物理内存，页表由操作系统维护并被处理器引用。</li>
+<li>如果虚拟地址对应物理地址不在物理内存中，则产生缺页中断，真正分配物理地址，同时更新进程的页表。</li>
+</ol>
+<h3 id="2-2-ELF文件结构"><a href="#2-2-ELF文件结构" class="headerlink" title="2.2 ELF文件结构"></a>2.2 ELF文件结构</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">ELF 头：</span><br><span class="line">  Magic：  7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 </span><br><span class="line">  类别:                              ELF64</span><br><span class="line">  数据:                              2 补码，小端序 (little endian)</span><br><span class="line">  版本:                              1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI 版本:                          0</span><br><span class="line">  类型:                              EXEC (可执行文件)</span><br><span class="line">  系统架构:                          Advanced Micro Devices X86-64</span><br><span class="line">  版本:                              0x1</span><br><span class="line">  入口点地址：              0x4906e0</span><br><span class="line">  程序头起点：              64 (bytes into file)</span><br><span class="line">  Start of section headers:          36646016 (bytes into file)</span><br><span class="line">  标志：             0x0</span><br><span class="line">  本头的大小：       64 (字节)</span><br><span class="line">  程序头大小：       56 (字节)</span><br><span class="line">  Number of program headers:         9</span><br><span class="line">  节头大小：         64 (字节)</span><br><span class="line">  节头数量：         41</span><br><span class="line">  字符串表索引节头： 38</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">Elf file type is EXEC (Executable file)</span><br><span class="line">Entry point 0x495db0</span><br><span class="line">There are 9 program headers, starting at offset 64</span><br><span class="line"></span><br><span class="line">Program Headers:</span><br><span class="line">  Type           Offset             VirtAddr           PhysAddr</span><br><span class="line">                 FileSiz            MemSiz              Flags  Align</span><br><span class="line">  PHDR           0x0000000000000040 0x0000000000400040 0x0000000000400040</span><br><span class="line">                 0x00000000000001f8 0x00000000000001f8  R E    8</span><br><span class="line">  INTERP         0x0000000000000238 0x0000000000400238 0x0000000000400238</span><br><span class="line">                 0x000000000000001c 0x000000000000001c  R      1</span><br><span class="line">      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</span><br><span class="line">  LOAD           0x0000000000000000 0x0000000000400000 0x0000000000400000</span><br><span class="line">                 0x0000000000958f4c 0x0000000000958f4c  R E    200000</span><br><span class="line">  LOAD           0x0000000000959000 0x0000000000f59000 0x0000000000f59000</span><br><span class="line">                 0x000000000056b500 0x0000000000571fa8  RW     200000</span><br><span class="line">  DYNAMIC        0x0000000000964e48 0x0000000000f64e48 0x0000000000f64e48</span><br><span class="line">                 0x00000000000002c0 0x00000000000002c0  RW     8</span><br><span class="line">  NOTE           0x0000000000000254 0x0000000000400254 0x0000000000400254</span><br><span class="line">                 0x0000000000000020 0x0000000000000020  R      4</span><br><span class="line">  TLS            0x0000000000959000 0x0000000000f59000 0x0000000000f59000</span><br><span class="line">                 0x000000000000bda5 0x0000000000098658  R      8</span><br><span class="line">  GNU_EH_FRAME   0x00000000008c5468 0x0000000000cc5468 0x0000000000cc5468</span><br><span class="line">                 0x000000000001cae4 0x000000000001cae4  R      4</span><br><span class="line">  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000</span><br><span class="line">                 0x0000000000000000 0x0000000000000000  RW     8</span><br><span class="line"></span><br><span class="line"> Section to Segment mapping:</span><br><span class="line">  Segment Sections...</span><br><span class="line">   00     </span><br><span class="line">   01     .interp </span><br><span class="line">   02     .interp .note.ABI-tag .gnu.hash .dynsym .dynstr .gnu.version .gnu.version_r .rela.dyn .rela.plt .init .plt .text .fini .rodata .eh_frame_hdr .eh_frame </span><br><span class="line">   03     .tdata .ctors .dtors .jcr .data.rel.ro .dynamic .got .got.plt .data .bss </span><br><span class="line">   04     .dynamic </span><br><span class="line">   05     .note.ABI-tag </span><br><span class="line">   06     .tdata .tbss </span><br><span class="line">   07     .eh_frame_hdr </span><br><span class="line">   08</span><br></pre></td></tr></table></figure>
+<h3 id="2-3-进程地址空间布局"><a href="#2-3-进程地址空间布局" class="headerlink" title="2.3 进程地址空间布局"></a>2.3 进程地址空间布局</h3><ol>
+<li><p>各个进程的虚拟地址空间的范围是从0到TASK_SIZE-1，其上是内核地址空间。32位系统上地址空间范围可达2^32=4GB, 64位系统是2^48或2^56</p>
+</li>
+<li><p>用户空间与内核空间的默认划分比例是3:1，用户进程只能访问用户空间，访问内核空间会导致一个页错误(page fault)。通过虚拟地址无法访问其它进程的空间。</p>
+</li>
+<li><p>虚拟地址空间由许多不同长度的段组成，各段权限不一样，text段只能执行不能修改，文本内容只能读写不能执行。</p>
+</li>
+<li><p>无论当前那个用户进程处于活跃状态，虚拟地址空间的内核空间内容都是一样的，也就是说所有进程中的内核空间都映射到了同样的物理内存。内核代码和数据总是可寻址，随时准备处理中断和系统调用。用户模式地址空间的映射随进程切换的发生而不断变化。</p>
+</li>
+<li><p>对于linux中的每一个进程来说，它都以为整个系统中只有它自己和内核而已。它认为内存地址0xC0000000以下都是它自己的活动空间，0xC0000000以上是OS内核的活动空间。</p>
+<p><img src="/images/process_struct_01.png" alt="内核空间与进程空间"></p>
+</li>
+</ol>
+<h3 id="2-4-内存段结构"><a href="#2-4-内存段结构" class="headerlink" title="2.4 内存段结构"></a>2.4 内存段结构</h3><p><img src="/images/process_struct_02.gif" alt="内存段结构"></p>
+<p>为了容易理解，我们人为的把进程内各个段，分为静态区域和动态区域:<br>    静态区域：主要包括代码段和数据段。<br>    动态区域：主要包括堆区，文件映射区和栈区。</p>
+<p>在内存管理领域，我们一般用「堆」指代用于分配动态内存的虚拟地址空间，而用「栈」指代用于分配静态内存的虚拟地址空间。<br>具体到虚拟内存布局（Memory Layout），堆维护在通过 brk 系统调用申请的「Heap」及通过 mmap 系统调用申请的「Memory Mapping Segment」中；<br>而栈维护在通过汇编栈指令动态调整的「Stack」中。在 Glibc 里，「Heap」用于分配较小的内存及主线程使用的内存。</p>
+<h4 id="2-4-1-静态区域"><a href="#2-4-1-静态区域" class="headerlink" title="2.4.1 静态区域"></a>2.4.1 静态区域</h4><p>静态区域的内容是在程序编译和链接时就确定好的主要包括代码和数据两部分。 程序启动时直接从磁盘拷贝到当前的内存空间，大小相等。<br>用size命令可以查看程序组成部分<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[leapking@localhost bin]$ size testproc</span><br><span class="line">text	data	 bss	dec			hex		filename</span><br><span class="line">9800934	5682413	 602968	16086315	f5752b	testproc</span><br></pre></td></tr></table></figure></p>
+<h5 id="2-4-1-1-代码段"><a href="#2-4-1-1-代码段" class="headerlink" title="2.4.1.1 代码段"></a>2.4.1.1 代码段</h5><p>代码段，用来存放程序中的可执行代码，包括只读的代码和常量<br>.text：用于存储当前运行程序的二进制代码（函数）<br>.rodata：用于存储常量数据，比如：字符串常量。</p>
+<h5 id="2-4-1-2-数据段"><a href="#2-4-1-2-数据段" class="headerlink" title="2.4.1.2 数据段"></a>2.4.1.2 数据段</h5><p>数据段，用来存放全局变量或static类型的局部变量<br>.data：也叫GVAR(global value)，用来存放已初始化的全局变量，为数据分配空间<br>1）已初始化的非0的全局变量；<br>2）已初始化为非0的static局部变量<br>.bss：用来存放未初始化的全局变量，该段内容只记录数据所需空间大小，并不分配真实空间。<br>1）未初始化的全局变量；<br>2）未初始化的static修饰的局部变量。</p>
+<p>text和data段都在可执行文件中，由系统从可执行文件中加载；而bss段不在可执行文件中，由系统初始化。 这几段内存就组成了我们编写的程序的本体，但是一个程序运行起来，还需要更多的数据和数据间的交互，否则这个程序就是死的，无用的。所以我们还需要为更多的数据和数据交互提供一块内存——堆栈。</p>
+<h4 id="2-4-2-动态区域"><a href="#2-4-2-动态区域" class="headerlink" title="2.4.2 动态区域"></a>2.4.2 动态区域</h4><p><img src="/images/process_struct_03.png" alt=""></p>
+<p>动态区域：是在程序加载、调入、执行的时候分配/回收的内存。</p>
+<h5 id="2-4-2-1-堆"><a href="#2-4-2-1-堆" class="headerlink" title="2.4.2.1 堆"></a>2.4.2.1 堆</h5><p>Heap：堆，用于存放进程运行时动态分配的内存段，可动态扩张或缩减。堆中内容是匿名的，不能按名字直接访问，只能通过指针间接访问。按内存地址由低到高方向生长，其大小由系统内存/虚拟内存上限决定，速度较慢，但自由性大，可用空间大。 当进程调用malloc(C)/new(C++)等函数分配内存时，新分配的内存动态添加到堆上(扩张)；当调用free(C)/delete(C++)等函数释放内存时，被释放的内存从堆中剔除(缩减) 。</p>
+<p>​     分配的堆内存是经过字节对齐的空间，以适合原子操作。堆管理器通过链表管理每个申请的内存，由于堆申请和释放是无序的，最终会产生内存碎片。堆内存一般由应用程序分配释放，回收的内存可供重新使用。若程序员不释放，程序结束时操作系统可能会自动回收。</p>
+<p>​     堆的末端由break指针标识，当堆管理器需要更多内存时，可通过系统调用brk()和sbrk()来移动break指针以扩张堆，一般由系统自动调用。</p>
+<blockquote>
+<p>注意，堆不同于数据结构中的”堆”，其行为类似链表。</p>
+<p> 使用堆时经常出现两种问题：1) 释放或改写仍在使用的内存(“内存破坏”)；2)未释放不再使用的内存(“内存泄漏”)。当释放次数少于申请次数时，可能已造成内存泄漏。泄漏的内存往往比忘记释放的数据结构更大，因为所分配的内存通常会圆整为下个大于申请数量的2的幂次(如申请212B，会圆整为256B)。</p>
+</blockquote>
+<h5 id="2-4-2-2-文件映射区"><a href="#2-4-2-2-文件映射区" class="headerlink" title="2.4.2.2 文件映射区"></a>2.4.2.2 文件映射区</h5><p>将文件内容映射到虚拟地址空间中的内存映射，该区域主要有三个用途：</p>
+<ol>
+<li><p>mmap映射文件(普通文件,也可以是其它类型的文件) 库，用户自己调用mmap函数。此处，内核将硬盘文件的内容直接映射到内存, 任何应用程序都可通过Linux的mmap()系统调用或Windows的CreateFileMapping()/MapViewOfFile()请求这种映射。用户也可创建匿名内存映射，该映射没有对应的文件, 可用于存放程序数据。</p>
+</li>
+<li><p>在 Linux中，若通过malloc()请求一大块内存，C运行库将创建一个匿名内存映射，而不使用堆内存。”大块” 意味着比阈值 MMAP_THRESHOLD还大，缺省为128KB，可通过mallopt()调整。</p>
+</li>
+<li>内存映射是一种方便高效的文件I/O方式， 因而被用于装载动态共享库。在Linux 2.4版本中，若可执行文件依赖共享库，则系统会为这些动态库在从0x40000000开始的地址分配相应空间，并在程序装载时将其载入到该空间。在Linux 2.6内核中，共享库的起始地址被往上移动至更靠近栈区的位置。</li>
+</ol>
+<blockquote>
+<p>从进程地址空间的布局可以看到，在有共享库的情况下，留给堆的可用空间还有两处：一处是从.bss段到0x40000000，约不到1GB的空间；另一处是从共享库到栈之间的空间，约不到2GB。这两块空间大小取决于栈、共享库的大小和数量。这样来看，是否应用程序可申请的最大堆空间只有2GB？事实上，这与Linux内核版本有关。在上面给出的进程地址空间经典布局图中，共享库的装载地址为0x40000000，这实际上是Linux kernel 2.6版本之前的情况了，在2.6版本里，共享库的装载地址已经被挪到靠近栈的位置，即位于0xBFxxxxxx附近，因此，此时的堆范围就不会被共享库分割成2个“碎片”，故kernel 2.6的32位Linux系统中，malloc申请的最大内存理论值在2.9GB左右。 </p>
+</blockquote>
+<p>mmap映射区向下扩展，堆向上扩展，两者相对扩展，直到耗尽虚拟地址空间中的剩余区域。</p>
+<h5 id="2-4-2-3-栈"><a href="#2-4-2-3-栈" class="headerlink" title="2.4.2.3 栈"></a>2.4.2.3 栈</h5><p>Stack：栈，存储局部变量，函数调用传参过程也会用到栈。按内存地址由高到低方向生长，其最大大小由编译时确定，速度快，但自由性差，最大空间不大。</p>
+<p>栈又称堆栈，由编译器自动分配释放，行为类似数据结构中的栈(先进后出)。</p>
+<p>堆栈主要有三个用途：</p>
+<ol>
+<li>为函数内部声明的非静态局部变量(C语言中称“自动变量”)提供存储空间。</li>
+<li>记录函数调用过程相关的维护性信息，称为栈帧(Stack Frame)或过程活动记录(Procedure Activation Record)。它包括函数返回地址，不适合装入寄存器的函数参数及一些寄存器值的保存。除递归调用外，堆栈并非必需。因为编译时可获知局部变量，参数和返回地址所需空间，并将其分配于BSS段。</li>
+<li>临时存储区，用于暂存长算术表达式部分计算结果或alloca()函数分配的栈内内存。</li>
+</ol>
+<p>持续地重用栈空间有助于使活跃的栈内存保持在CPU缓存中，从而加速访问。进程中的每个线程都有属于自己的栈。向栈中不断压入数据时，若超出其容量就会耗尽栈对应的内存区域，从而触发一个页错误。此时若栈的大小低于堆栈最大值RLIMIT_STACK(通常是8M)，则栈会动态增长，程序继续运行。映射的栈区扩展到所需大小后，不再收缩。</p>
+<p>Linux中ulimit -s命令可查看和设置堆栈最大值，当程序使用的堆栈超过该值时, 发生栈溢出(Stack Overflow)，程序收到一个段错误(Segmentation Fault)。注意，调高堆栈容量可能会增加内存开销和启动时间。</p>
+<p><strong>注意：</strong>堆和栈都是用于动态的分配内存，两者空间大小都是可变的。每个线程都会有自己的栈，但是堆空间是共用的。</p>
+<h4 id="2-4-3-内核映射区"><a href="#2-4-3-内核映射区" class="headerlink" title="2.4.3 内核映射区"></a>2.4.3 内核映射区</h4><p><img src="/images/process_struct_04.jpg" alt=""></p>
+<p>(1)内核映射区就是将操作系统内核程序映射到这个区域。<br>(2)对于linux中的每一个进程来说，它都以为整个系统中只有它自己和内核而已。它认为内存地址0xC0000000以下都是它自己的活动空间，0xC0000000以上是OS内核的活动空间。</p>
+<p>执行程序时,系统首先在内核空间中创建一个进程,为这个进程申请PCB(进程控制块 task_struct)<br>用于管理整个进程的所有资源,其中mm_struct成员用来管理与当先进程相关的所有内存资源<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;mm_types.h&gt;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mm_struct</span>&#123;</span></span><br><span class="line">...</span><br><span class="line">    <span class="function"><span class="keyword">unsigned</span> <span class="title">long</span> <span class="params">(*get_unmapped_area)</span> <span class="params">(...)</span></span>;</span><br><span class="line">...</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> mmap_base; <span class="comment">/* mmap区域的基地址 */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> task_size; <span class="comment">/* 进程虚拟地址空间的长度 */</span></span><br><span class="line">...</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> start_code, end_code; <span class="comment">/* 代码段的范围 */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> start_data, end_data; <span class="comment">/* 数据段的范围 */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> start_brk, brk, start_stack; <span class="comment">/* 堆的范围，start_brk不会改变， brk动态调整*/</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> arg_start, arg_end, env_start, env_end; <span class="comment">/* 命令行参数和环境变量的范围，都位于栈中最高区域 */</span></span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>mmap_base表示虚拟地址空间中用于内存映射的起始地址，可用get_unmapped_area在mmap区域中为新映射找到适当的位置。<br>task_size存储了进程地址空间的长度，通常是TASK_SIZE。<br>text段映射到虚拟地址的那个地方由ELF标准确定（IA-32起始于0x08048000, AMD64起始于0x0000000000400000）。<br>在ELF二进制可执行文件被映射到地址空间后，代码段和数据段这些区域的长度不再改变。<br>栈起始于STACK_TOP通常等于TASK_SIZE，即用户地址空间中最高的可用地址。命令行参数列表和环境变量都是栈的初始数据。<br>用于内存映射的区域起始于mm_struct-&gt;mmap_base，通常设置为TASK_UNMAPPED_BASE=TASK_SIZE/3。</p>
+<p>注：进程可以通过设置PF_RANDOMIZE标志，使栈和内存映射的起点随机指定。如果攻击者无法依靠固定地址找到栈，那么想要通过缓冲区溢出获得栈内存访问权，而后恶意操纵栈的内容，将困难的多。该标志通常是启用的。</p>
+<h4 id="2-4-4-进程内存虚拟地址信息"><a href="#2-4-4-进程内存虚拟地址信息" class="headerlink" title="2.4.4 进程内存虚拟地址信息"></a>2.4.4 进程内存虚拟地址信息</h4><p>进程的运行时内存信息存储在cat /proc/28246/maps中，也可以借助pmap命令进行方便的查看<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[root@centos1 ~]# pmap 28246</span><br><span class="line">28246:   ./mem</span><br><span class="line">0000000000400000      4K r-x--  /mnt/hgfs/www/web/thread/process_thread_study/c/mem</span><br><span class="line">0000000000600000      4K rw---  /mnt/hgfs/www/web/thread/process_thread_study/c/mem</span><br><span class="line">0000003339e00000    128K r-x--  /lib64/ld-2.12.so</span><br><span class="line">000000333a020000      4K r----  /lib64/ld-2.12.so</span><br><span class="line">000000333a021000      4K rw---  /lib64/ld-2.12.so</span><br><span class="line">000000333a022000      4K rw---    [ anon ]</span><br><span class="line">000000333a200000   1576K r-x--  /lib64/libc-2.12.so</span><br><span class="line">000000333a38a000   2048K -----  /lib64/libc-2.12.so</span><br><span class="line">000000333a58a000     16K r----  /lib64/libc-2.12.so</span><br><span class="line">000000333a58e000      8K rw---  /lib64/libc-2.12.so</span><br><span class="line">000000333a590000     16K rw---    [ anon ]</span><br><span class="line">00007f605b8ff000     12K rw---    [ anon ]</span><br><span class="line">00007f605b910000      8K rw---    [ anon ]</span><br><span class="line">00007ffce591e000     84K rw---    [ stack ]</span><br><span class="line">00007ffce59ac000      4K r-x--    [ anon ]</span><br><span class="line">ffffffffff600000      4K r-x--    [ anon ]</span><br><span class="line"> total             3924K</span><br></pre></td></tr></table></figure></p>
+<h2 id="3-glibc对内存的分配和回收"><a href="#3-glibc对内存的分配和回收" class="headerlink" title="3 glibc对内存的分配和回收"></a>3 glibc对内存的分配和回收</h2><h3 id="3-1-Malloc如何分配内存"><a href="#3-1-Malloc如何分配内存" class="headerlink" title="3.1 Malloc如何分配内存"></a>3.1 Malloc如何分配内存</h3><p>malloc 是 glibc 中内存分配函数，也是最常用的动态内存分配函数，其内存必须通过 free 进行释放，否则导致内存泄露。<br>关于 malloc 获得虚存空间的实现，与 glibc 的版本有关，但大体逻辑是：</p>
+<ol>
+<li>若分配内存小于 128k ，调用 sbrk() ，将堆顶指针向高地址移动，获得新的虚存空间。</li>
+<li>若分配内存大于 128k ，调用 mmap() ，在文件映射区域中分配匿名虚存空间。</li>
+</ol>
+<p>这里讨论的是简单情况，如果涉及并发可能会复杂一些，不过先不讨论。<br>其中 sbrk 就是修改栈顶指针位置，而 mmap 可用于生成文件的映射以及匿名页面的内存，这里指的是匿名页面。<br>这个 128k ，是 glibc 的默认配置，可通过函数 mallopt 来设置，可通过以下例子说明。</p>
+<h3 id="3-2-Malloc申请大小与分配大小"><a href="#3-2-Malloc申请大小与分配大小" class="headerlink" title="3.2 Malloc申请大小与分配大小"></a>3.2 Malloc申请大小与分配大小</h3><p>我们知道， malloc 分配的的内存是虚拟地址空间，而虚拟地址空间和物理地址空间使用进程页表进行映射，那么分配了空间就是占用物理内存空间了吗？</p>
+<p>VSZ ， virtual memory size ，虚存。表示进程总共使用的虚拟地址空间大小，包括进程地址空间的代码段、数据段、堆、文件映射区域、栈、内核空间等所有虚拟地址使用的总和，单位是 K。如果 VSZ 发生变化，基本与分配内存量相当，因为 VSZ 是计算虚拟地址空间总大小。</p>
+<p>RSS ， resident set size ，实存。表示进程实际使用的物理内存空间， RSS 总小于 VSZ 。RSS 的增量很少，是因为 malloc 分配的内存并不就马上分配实际存储空间，而是第一次使用时发现虚存对应的物理页面未分配，产生缺页中断，才真正分配物理页面，同时更新进程页面的映射关系。而且由于每个物理内存页面大小是 4k ，不管 memset 其中的 1k 还是 5k 、 7k ，实际占用物理内存总是 4k 的倍数。所以 RSS 的增量总是 4k 的倍数。</p>
+<p>而且，内存并不是每次malloc后都增长，如果申请的小于128K，它先是看堆顶内是否有可重用剩余的空间，这样的 malloc 是很轻量快速的。另外，free的时候是如何知道释放多少大小的呢？其实在每一块申请的内存头部都会多分配一个size_t大小的内存用来记录分配的内存大小。</p>
+<h3 id="3-3-Free对内存的释放"><a href="#3-3-Free对内存的释放" class="headerlink" title="3.3 Free对内存的释放"></a>3.3 Free对内存的释放</h3><p><img src="/images/process_struct_05.jpg" alt=""></p>
+<p>（1）初始状态时分配 了ABCD 四块内存，其中 ABD小于128KB 在堆内分配， C大于128KB 使用 mmap 分配。<br>（2）分配了100KB的E堆顶指针向上移动了100KB。<br>（3）释放 A 的内存，在 glibc 中，仅仅是标记为可用，形成一个内存空洞 ( 碎片 ) ，并没有真正释放。</p>
+<p><img src="/images/process_struct_06.jpg" alt=""></p>
+<p>(4) 释放C，C大于 128K ，使用 mmap 分配，释放时会调用 munmap 真正释放该空间，还给 操作系统。<br>(5) 释放 D， 同样会导致一个空洞，获得空闲空间，但并不会还给操作系统 。此时，空闲总空间为 100K ，但由于虚拟地址不连续，无法合并，空闲空间无法满足大于 60k 的分配请求。<br>(6) 释放 E ，由于与 D 连续，两者将进行合并，得到 160k 连续空闲空间。当最高地址空间的空闲内存超过128K（可由M_TRIM_THRESHOLD选项调节）时，执行内存紧缩操作（trim），将原堆顶空间还给 操作系统。</p>
+<p>由此可见：<br>malloc 使用 mmap 分配的内存 ( 大于 128k) ， free 会调用 munmap 系统调用马上还给 操作系统，实现真正释放。<br>堆内的内存，只有释放堆顶的空间，同时堆顶总连续空闲空间大于 128k 才使用 sbrk(-SIZE) 回收内存，真正归还 操作系统 。堆内的空闲空间，是不会归还给操作系统，形成内存碎片。</p>
+<blockquote>
+<p>由于堆内碎片不能直接释放，导致疑似“内存泄露”问题，为什么 malloc 不全部使用 mmap 来实现呢？而仅仅对于大于 128k 的大块内存才使用 mmap ？</p>
+<p>其实，进程向 OS 申请和释放地址空间的接口 sbrk/mmap/munmap 都是系统调用，频繁调用系统调用都比较消耗系统资源的。并且， mmap 申请的内存被 munmap 后，重新申请会产生更多的缺页中断。例如使用 mmap 分配 1M 空间，第一次调用产生了大量缺页中断 (1M/4K 次 ) ，当 munmap 后再次分配 1M 空间，会再次产生大量缺页中断。缺页中断是内核行为，会导致内核态 CPU 消耗较大。另外，如果使用 mmap 分配小内存，会导致地址空间的分片更多，内核的管理负担更大。</p>
+<p>而堆是一个连续空间，并且堆内碎片由于没有归还 OS ，如果可重用碎片，再次访问该内存很可能不需产生任何系统调用和缺页中断，这将大大降低 CPU 的消耗。因此， glibc 的 malloc 实现中，充分考虑了 sbrk 和 mmap 行为上的差异及优缺点，默认分配大块内存 (128k) 才使用 mmap 获得地址空间，也可通过 <code>mallopt(M_MMAP_THRESHOLD, &lt;SIZE&gt;)</code>来修改这个临界值。</p>
+</blockquote>
+<h2 id="4-内存监控"><a href="#4-内存监控" class="headerlink" title="4 内存监控"></a>4 内存监控</h2><h3 id="4-1-通过命令监控"><a href="#4-1-通过命令监控" class="headerlink" title="4.1 通过命令监控"></a>4.1 通过命令监控</h3><p>进程的实际使用内存可以有多种查看方法：</p>
+<ol>
+<li>ps aux</li>
+<li>top -p PID</li>
+<li>pmap -x PID</li>
+<li>cat /proc/PID/maps|mmaps|status</li>
+</ol>
+<h3 id="4-2-应用程序内部监控"><a href="#4-2-应用程序内部监控" class="headerlink" title="4.2 应用程序内部监控"></a>4.2 应用程序内部监控</h3><h4 id="4-2-1-hook"><a href="#4-2-1-hook" class="headerlink" title="4.2.1 hook"></a>4.2.1 hook</h4><p>通过钩子函数方法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdio.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"malloc.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Notice: hook method is not thread safety */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* prototype define for us */</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> *<span class="title">my_malloc_hook</span><span class="params">(<span class="keyword">size_t</span>, <span class="keyword">const</span> <span class="keyword">void</span> *)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">my_free_hook</span><span class="params">(<span class="keyword">void</span> *, <span class="keyword">const</span> <span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* some temp variable */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> *(*old_malloc_hook)(<span class="keyword">size_t</span>, <span class="keyword">const</span> <span class="keyword">void</span> *);</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="title">void</span> <span class="params">(*old_free_hook)</span><span class="params">(<span class="keyword">void</span> *, <span class="keyword">const</span> <span class="keyword">void</span> *)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* init function */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">my_init_hook(<span class="keyword">void</span>)&#123;</span><br><span class="line">	old_malloc_hook = __malloc_hook;</span><br><span class="line">	old_free_hook = __free_hook;</span><br><span class="line">	__malloc_hook = my_malloc_hook;</span><br><span class="line">	__free_hook = my_free_hook;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*my alloc hook*/</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span> *</span><br><span class="line">my_malloc_hook(<span class="keyword">size_t</span> size, <span class="keyword">const</span> <span class="keyword">void</span> * caller)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">void</span> *result; <span class="comment">/*malloc's return*/</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*restore all old hooks*/</span></span><br><span class="line">	__malloc_hook = old_malloc_hook;</span><br><span class="line">	__free_hook = old_free_hook;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*call recursively*/</span></span><br><span class="line">	result = <span class="built_in">malloc</span>(size);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*save underlying hooks*/</span></span><br><span class="line">	old_malloc_hook = __malloc_hook;</span><br><span class="line">	old_free_hook = __free_hook;</span><br><span class="line">	__malloc_hook = my_malloc_hook;</span><br><span class="line">	__free_hook = my_free_hook;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*printf might call malloc, so protect it too*/</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"malloc(%u) call from %p, return %p\n"</span>,(<span class="keyword">unsigned</span> <span class="keyword">int</span>)size, caller, result);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">my_free_hook(<span class="keyword">void</span> *ptr, <span class="keyword">const</span> <span class="keyword">void</span> *caller)</span><br><span class="line">&#123;</span><br><span class="line">	__malloc_hook = old_malloc_hook;</span><br><span class="line">	__free_hook = old_free_hook;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">free</span>(ptr);</span><br><span class="line"></span><br><span class="line">	old_malloc_hook = __malloc_hook;</span><br><span class="line">	old_free_hook = __free_hook;</span><br><span class="line">	__malloc_hook = my_malloc_hook;</span><br><span class="line">	__free_hook = my_free_hook;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"%s free %p\n"</span>, caller, ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*initialize hook*/</span></span><br><span class="line"><span class="keyword">void</span> (*__malloc_initialize_hook) (<span class="keyword">void</span>) = my_init_hook;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*main*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> *p;</span><br><span class="line"></span><br><span class="line">    p = <span class="built_in">malloc</span>(<span class="number">10</span>);</span><br><span class="line">    <span class="comment">//free(p);</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="4-2-2-wrap"><a href="#4-2-2-wrap" class="headerlink" title="4.2.2 wrap"></a>4.2.2 wrap</h4><p>通过重载方法</p>
+<p>编译方法：gcc -g -Wl,-wrap,malloc -Wl,-wrap,calloc -Wl,-wrap,realloc -Wl,-wrap,free mem_trace_wrap.c</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdio.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"stdlib.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> ARRYSIZE 50</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> GetMemRealSize(ptr) *(size_t *)((char *)(ptr)-sizeof(size_t))</span></span><br><span class="line"><span class="keyword">long</span> MemoryCount = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> * __real_malloc(<span class="keyword">size_t</span> size);</span><br><span class="line"><span class="keyword">void</span> * __real_calloc(<span class="keyword">size_t</span> n, <span class="keyword">size_t</span> size);</span><br><span class="line"><span class="keyword">void</span> * __real_realloc(<span class="keyword">void</span> *ptr, <span class="keyword">size_t</span> size);</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> * __wrap_malloc(<span class="keyword">size_t</span> size)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">void</span> *ptr = __real_malloc(size);</span><br><span class="line">	<span class="keyword">size_t</span> realsize = GetMemRealSize(ptr);</span><br><span class="line">	MemoryCount += realsize;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"malloc %d/%d, count %d\n"</span>, size, realsize, MemoryCount);</span><br><span class="line">	<span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> * __wrap_calloc(<span class="keyword">size_t</span> n, <span class="keyword">size_t</span> size)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">void</span> *ptr = __real_calloc(n, size);</span><br><span class="line">	<span class="keyword">size_t</span> realsize = GetMemRealSize(ptr);</span><br><span class="line">	MemoryCount += realsize;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"calloc %d/%d, count %d\n"</span>, n*size, realsize, MemoryCount);</span><br><span class="line">	<span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> * __wrap_realloc(<span class="keyword">void</span> *ptr, <span class="keyword">size_t</span> size)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">size_t</span> oldsize, newsize;</span><br><span class="line"></span><br><span class="line">	oldsize = GetMemRealSize(ptr);</span><br><span class="line">	MemoryCount -= oldsize;</span><br><span class="line"></span><br><span class="line">	ptr = __real_realloc(ptr, size);</span><br><span class="line"></span><br><span class="line">	newsize = GetMemRealSize(ptr);</span><br><span class="line">	MemoryCount += newsize;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"realloc %d-&gt;%d, count %d\n"</span>, oldsize, newsize, MemoryCount);</span><br><span class="line">	<span class="keyword">return</span> ptr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> __wrap_free(<span class="keyword">void</span> *ptr)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">size_t</span> size = GetMemRealSize(ptr);</span><br><span class="line"></span><br><span class="line">	MemoryCount -= size;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"free %d, count %d\n"</span>, size, MemoryCount);</span><br><span class="line">	__real_free(ptr);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line">	<span class="keyword">char</span> *arry[ARRYSIZE] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\nBegin malloc-------------------------------\n"</span>);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRYSIZE; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		arry[i] = <span class="built_in">malloc</span>((i+<span class="number">1</span>) * <span class="number">1024</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\nBegin free-------------------------------\n"</span>);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRYSIZE; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">free</span>(arry[i]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\nBegin calloc-------------------------------\n"</span>);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRYSIZE; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		arry[i] = <span class="built_in">calloc</span>(<span class="number">1</span>, (i+<span class="number">1</span>) * <span class="number">1024</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\nBegin realloc-------------------------------\n"</span>);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRYSIZE; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		arry[i] = <span class="built_in">realloc</span>(arry[i], (i+<span class="number">1</span>)*<span class="number">2</span>*<span class="number">1024</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\nBegin free-------------------------------\n"</span>);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; ARRYSIZE; i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">free</span>(arry[i]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (MemoryCount)</span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stderr</span>, <span class="string">"WARING: memory leak size %lu\n"</span>, MemoryCount);</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="built_in">fprintf</span>(<span class="built_in">stdout</span>, <span class="string">"no memory leak occured.\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="4-2-3-vliage"><a href="#4-2-3-vliage" class="headerlink" title="4.2.3 vliage"></a>4.2.3 vliage</h4><h2 id="5-内存泄露"><a href="#5-内存泄露" class="headerlink" title="5 内存泄露"></a>5 内存泄露</h2><p>内存占用过大，有可能是真正的泄露，还有可能是内存碎片引起的。</p>
+<h3 id="5-1-内存碎片"><a href="#5-1-内存碎片" class="headerlink" title="5.1 内存碎片"></a>5.1 内存碎片</h3><p>内存碎片，也叫内存空洞</p>
+<h4 id="5-1-1-如何查看堆内内存的碎片情况"><a href="#5-1-1-如何查看堆内内存的碎片情况" class="headerlink" title="5.1.1 如何查看堆内内存的碎片情况"></a>5.1.1 如何查看堆内内存的碎片情况</h4><p>简单的办法就是cat /proc/PID/status</p>
+<p>StaBrk:    1ce57000 kB<br>Brk:    1cfb0000 kB</p>
+<p>根据这两个值算出堆大小，是否异常大。</p>
+<p>其实，glibc 提供了以下结构和接口来查看堆内内存和 mmap 的使用情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">struct mallinfo &#123;</span><br><span class="line">  int arena;    /* non-mmapped space allocated from system */</span><br><span class="line">  int ordblks;  /* number of free chunks */</span><br><span class="line">  int smblks;   /* number of fastbin blocks */</span><br><span class="line">  int hblks;    /* number of mmapped regions */</span><br><span class="line">  int hblkhd;   /* space in mmapped regions */</span><br><span class="line">  int usmblks;  /* maximum total allocated space */</span><br><span class="line">  int fsmblks;  /* space available in freed fastbin blocks */</span><br><span class="line">  int uordblks; /* total allocated space */</span><br><span class="line">  int fordblks; /* total free space */</span><br><span class="line">  int keepcost; /* top-most, releasable (via malloc_trim) space */</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/* 返回 heap(main_arena) 的内存使用情况，以 mallinfo 结构返回 */</span><br><span class="line">struct mallinfo mallinfo();</span><br><span class="line">/* 将 heap 和 mmap 的使用情况输出到 stderr  */</span><br><span class="line">void malloc_stats();</span><br></pre></td></tr></table></figure>
+<p>可通过以下例子来验证 mallinfo 和 malloc_stats 输出结果。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;string.h&gt;</span><br><span class="line">#include &lt;unistd.h&gt;</span><br><span class="line">#include &lt;sys/mman.h&gt;</span><br><span class="line">#include &lt;malloc.h&gt;</span><br><span class="line">size_t  heap_malloc_total, heap_free_total,</span><br><span class="line">                mmap_total, mmap_count;</span><br><span class="line">void print_info()</span><br><span class="line">&#123;</span><br><span class="line">        struct mallinfo mi = mallinfo();</span><br><span class="line">        printf(&quot;count by itself:\n&quot;);</span><br><span class="line">        printf(&quot;\theap_malloc_total=%lu heap_free_total=%lu heap_in_use=%lu\n\</span><br><span class="line">\tmmap_total=%lu mmap_count=%lu\n&quot;,</span><br><span class="line">                heap_malloc_total*1024, heap_free_total*1024, heap_malloc_total*1024 - heap_free_total*1024,</span><br><span class="line">                mmap_total*1024, mmap_count);</span><br><span class="line">        printf(&quot;count by mallinfo:\n&quot;);</span><br><span class="line">        printf(&quot;\theap_malloc_total=%lu heap_free_total=%lu heap_in_use=%lu\n\</span><br><span class="line">\tmmap_total=%lu mmap_count=%lu\n&quot;,</span><br><span class="line">                mi.arena, mi.fordblks, mi.uordblks,</span><br><span class="line">                mi.hblkhd, mi.hblks);</span><br><span class="line">      printf(&quot;from malloc_stats:\n&quot;);</span><br><span class="line">        malloc_stats();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#define ARRAY_SIZE 200</span><br><span class="line">int main(int argc, char** argv)</span><br><span class="line">&#123;</span><br><span class="line">        char** ptr_arr[ARRAY_SIZE];</span><br><span class="line">        int i;</span><br><span class="line">        for( i = 0; i &lt; ARRAY_SIZE; i++) &#123;</span><br><span class="line">                ptr_arr[i] = malloc(i * 1024);</span><br><span class="line">                if ( i &lt; 128)</span><br><span class="line">                        heap_malloc_total += i;</span><br><span class="line">                else &#123;</span><br><span class="line">                        mmap_total += i;</span><br><span class="line">                        mmap_count++;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        print_info();</span><br><span class="line">        for( i = 0; i &lt; ARRAY_SIZE; i++) &#123;</span><br><span class="line">                if ( i % 2 == 0)</span><br><span class="line">                        continue;</span><br><span class="line">                free(ptr_arr[i]);</span><br><span class="line">                if ( i &lt; 128)</span><br><span class="line">                        heap_free_total += i;</span><br><span class="line">                else &#123;</span><br><span class="line">                        mmap_total -= i;</span><br><span class="line">                        mmap_count--;</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;\nafter free\n&quot;);</span><br><span class="line">        print_info();</span><br><span class="line">        return 1;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该例子第一个循环为指针数组每个成员分配索引位置 (KB) 大小的内存块，并通过 128 为分界分别对 heap 和 mmap 内存分配情况进行计数；第二个循环是 free 索引下标为奇数的项，同时更新计数情况。通过程序的计数与 mallinfo/malloc_stats 接口得到结果进行对比，并通过 print_info 打印到终端。</p>
+<p>下面是一个执行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">count by itself:</span><br><span class="line">        heap_malloc_total=8323072 heap_free_total=0 heap_in_use=8323072</span><br><span class="line">        mmap_total=12054528 mmap_count=72</span><br><span class="line">count by mallinfo:</span><br><span class="line">        heap_malloc_total=8327168 heap_free_total=2032 heap_in_use=8325136</span><br><span class="line">        mmap_total=12238848 mmap_count=72</span><br><span class="line">from malloc_stats:</span><br><span class="line">Arena 0:</span><br><span class="line">system bytes     =    8327168</span><br><span class="line">in use bytes     =    8325136</span><br><span class="line">Total (incl. mmap):</span><br><span class="line">system bytes     =   20566016</span><br><span class="line">in use bytes     =   20563984</span><br><span class="line">max mmap regions =         72</span><br><span class="line">max mmap bytes   =   12238848</span><br><span class="line"></span><br><span class="line">after free</span><br><span class="line"></span><br><span class="line">count by itself:</span><br><span class="line">        heap_malloc_total=8323072 heap_free_total=4194304 heap_in_use=4128768</span><br><span class="line">        mmap_total=6008832 mmap_count=36</span><br><span class="line">count by mallinfo:</span><br><span class="line">        heap_malloc_total=8327168 heap_free_total=4197360 heap_in_use=4129808</span><br><span class="line">        mmap_total=6119424 mmap_count=36</span><br><span class="line">from malloc_stats:</span><br><span class="line">Arena 0:</span><br><span class="line">system bytes     =    8327168</span><br><span class="line">in use bytes     =    4129808</span><br><span class="line">Total (incl. mmap):</span><br><span class="line">system bytes     =   14446592</span><br><span class="line">in use bytes     =   10249232</span><br><span class="line">max mmap regions =         72</span><br><span class="line">max mmap bytes   =   12238848</span><br></pre></td></tr></table></figure>
+<p>由上可知，程序统计和 mallinfo 得到的信息基本吻合，其中 heap_free_total 表示堆内已释放的内存碎片总和。</p>
+<p>如果想知道堆内片究竟有多碎 ，可通过 mallinfo 结构中的 fsmblks 、 smblks 、 ordblks 值得到，这些值表示不同大小区间的碎片总个数，这些区间分别是 0~80 字节， 80~512 字节， 512~128k 。如果 fsmblks 、 smblks 的值过大，那碎片问题可能比较严重了。</p>
+<p>不过， mallinfo 结构有一个很致命的问题，就是其成员定义全部都是 int ，在 64 位环境中，其结构中的 uordblks/fordblks/arena/usmblks 很容易就会导致溢出，应该是历史遗留问题，使用时要注意！</p>
+<h4 id="5-1-2-如何避免内存碎片"><a href="#5-1-2-如何避免内存碎片" class="headerlink" title="5.1.2 如何避免内存碎片"></a>5.1.2 如何避免内存碎片</h4><p>基于glibc的机制这是无法避免的，唯一的建议就是采用就近原则，随用随放。</p>
+<p>除了 glibc 的 malloc/free ，还有其他第三方实现吗？</p>
+<p>其实，很多人开始诟病 glibc 内存管理的实现，就是在高并发性能低下和内存碎片化问题都比较严重，因此，陆续出现一些第三方工具来替换 glibc 的实现，最著名的当属 google 的 tcmalloc 和 facebook 的 jemalloc 。</p>
+<p>内存优化总结:ptmalloc、tcmalloc和jemalloc: <a href="http://www.cnhalo.net/2016/06/13/memory-optimize/" target="_blank" rel="noopener">http://www.cnhalo.net/2016/06/13/memory-optimize/</a></p>
+<h3 id="5-2-内存泄露"><a href="#5-2-内存泄露" class="headerlink" title="5.2 内存泄露"></a>5.2 内存泄露</h3><h4 id="5-2-1-内存泄露的发生方式"><a href="#5-2-1-内存泄露的发生方式" class="headerlink" title="5.2.1 内存泄露的发生方式"></a>5.2.1 内存泄露的发生方式</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">1. 常发性内存泄漏</span><br><span class="line">发生内存泄漏的代码会被多次执行到，每次被执行的时候都会导致一块内存泄漏 </span><br><span class="line"></span><br><span class="line">2. 偶发性内存泄漏</span><br><span class="line">发生内存泄漏的代码只有在某些特定环境或操作过程下才会发生。常发性和偶发性是相对的。对于特定的环境，偶发性的也许就变成了常发性的。所以测试环境和测试方法对检测内存泄漏至关重要</span><br><span class="line"></span><br><span class="line">3. 一次性内存泄漏</span><br><span class="line">发生内存泄漏的代码只会被执行一次，或者由于算法上的缺陷，导致总会有一块且仅有一块内存发生泄漏</span><br><span class="line"></span><br><span class="line">4. 隐式内存泄漏</span><br><span class="line">程序在运行过程中不停的分配内存，但是直到结束的时候才释放内存。严格的说这里并没有发生内存泄漏，因为最终程序释放了所有申请的内存。但是对于一个服务器程序，需要运行几天，几周甚至几个月，不及时释放内存也可能导致最终耗尽系统的所有内存。所以，我们称这类内存泄漏为隐式内存泄漏</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-1-常用内存泄露检查工具"><a href="#5-2-1-常用内存泄露检查工具" class="headerlink" title="5.2.1 常用内存泄露检查工具"></a>5.2.1 常用内存泄露检查工具</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">C/C++</span><br><span class="line">1. Valgrind: Debugging and profiling Linux programs, aiming at programs written in C and C++ </span><br><span class="line">2. ccmalloc: Linux和Solaris下对C和C++程序的简单的使用内存泄漏和malloc调试库 </span><br><span class="line">3. LeakTracer: Linux、Solaris和HP-UX下跟踪和分析C++程序中的内存泄漏 </span><br><span class="line">4. Electric Fence: Linux分发版中由Bruce Perens编写的malloc()调试库 </span><br><span class="line">5. Leaky: Linux下检测内存泄漏的程序 </span><br><span class="line">6. Dmalloc: Debug Malloc Library </span><br><span class="line">7. MEMWATCH: 由Johan Lindh编写，是一个开放源代码C语言内存错误检测工具，主要是通过gcc的precessor来进行 </span><br><span class="line">8. KCachegrind: A visualization tool for the profiling data generated by Cachegrind and Calltree </span><br><span class="line"></span><br><span class="line">Java</span><br><span class="line">1. Memory Analyzer: 是一款开源的JAVA内存分析软件，查找内存泄漏，能容易找到大块内存并验证谁在一直占用它，它是基于Eclipse RCP(Rich Client Platform)，可以下载RCP的独立版本或者Eclipse的插件 </span><br><span class="line">2. JProbe: 分析Java的内存泄漏 </span><br><span class="line">3. JProfiler: 一个全功能的Java剖析工具，专用于分析J2SE和J2EE应用程序。它把CPU、执行绪和内存的剖析组合在一个强大的应用中，GUI可以找到效能瓶颈、抓出内存泄漏、并解决执行绪的问题 </span><br><span class="line">4. JRockit: 用来诊断Java内存泄漏并指出根本原因，专门针对Intel平台并得到优化，能在Intel硬件上获得最高的性能 </span><br><span class="line">5. YourKit .NET &amp; Java Profiling: 业界领先的Java和.NET程序性能分析工具 </span><br><span class="line">6. AutomatedQA: AutomatedQA的获奖产品performance profiling和memory debugging工具集的下一代替换产品，支持Microsoft, Borland, Intel, Compaq 和 GNU编译器。可以为.NET和Windows程序生成全面细致的报告，从而帮助您轻松隔离并排除代码中含有的性能问题和内存/资源泄露问题。支持.Net 1.0,1.1,2.0,3.0和Windows 32/64位应用程序 </span><br><span class="line">7. Compuware DevPartner Java Edition: 包含Java内存检测，代码覆盖率测试，代码性能测试，线程死锁，分布式应用等几大功能模块 </span><br><span class="line"></span><br><span class="line">.NET</span><br><span class="line">1. .NET Memory Profiler: 找到内存泄漏并优化内存使用针对C#，VB.Net，或其它.Net程序 </span><br><span class="line">2. Windows Leaks Detector: 探测任何Win32应用程序中的任何资源泄漏(内存，句柄等)，基于Win API调用钩子 </span><br><span class="line">3. DTrace: 一款开源动态跟踪Dynamic Tracing，能在Unix类似平台运行，用户能够动态检测操作系统内核和用户进程，以更精确地掌握系统的资源使用状况，提高系统性能，减少支持成本，并进行有效的调节 </span><br><span class="line">4. IBM Rational PurifyPlus: 帮助开发人员查明C/C++、托管.NET、Java和VB6代码中的性能和可靠性错误。PurifyPlus 将内存错误和泄漏检测、应用程序性能描述、代码覆盖分析等功能组合在一个单一、完整的工具包中 </span><br><span class="line">5. Parasoft Insure++: 针对C/C++应用的运行时错误自动检测工具，它能够自动监测C/C++程序，发现其中存在着的内存破坏、内存泄漏、指针错误和I/O等错误。并通过使用一系列独特的技术(SCI技术和变异测试等)，彻底的检查和测试我们的代码，精确定位错误的准确位置并给出详细的诊断信息。能作为Microsoft Visual C++的一个插件运行 </span><br><span class="line">6. Compuware DevPartner for Visual C++ BoundsChecker Suite: 为C++开发者设计的运行错误检测和调试工具软件。作为Microsoft Visual Studio和C++ 6.0的一个插件运行 </span><br><span class="line">7. Electric Software GlowCode: 包括内存泄漏检查，code profiler，函数调用跟踪等功能。给C++和.Net开发者提供完整的错误诊断，和运行时性能分析工具包 </span><br><span class="line"></span><br><span class="line">FireFox / IE</span><br><span class="line">1. Leak Monitor: 一个Firefox扩展，能找出跟Firefox相关的泄漏类型 </span><br><span class="line">2. IE Leak Detector (Drip/IE Sieve): Drip和IE Sieve leak detectors帮助网页开发员提升动态网页性能通过报告可避免的因为IE局限的内存泄漏。</span><br><span class="line">3. JavaScript Memory Leak Detector: 微软全球产品开发欧洲团队(Global Product Development- Europe team, GPDE) 发布的一款调试工具，用来探测JavaScript代码中的内存泄漏，运行为IE系列的一个插件</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-2-使用Valgrind检查内存泄露"><a href="#5-2-2-使用Valgrind检查内存泄露" class="headerlink" title="5.2.2 使用Valgrind检查内存泄露"></a>5.2.2 使用Valgrind检查内存泄露</h4><p>Valgrind是一套Linux下，开放源代码(GPL V2)的仿真调试工具的集合。Valgrind由内核(core)以及基于内核的其他调试工具组成。内核类似于一个框架(framework)，它模拟了一个CPU环境，并提供服务给其他工具: 而其他工具则类似于插件(plug-in)，利用内核提供的服务完成各种特定的内存调试任务</p>
+<p>Valgrind包括如下一些工具</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">1. Memcheck</span><br><span class="line">这是valgrind应用最广泛的工具，一个重量级的内存检查器，能够发现开发中绝大多数内存错误使用情况，比如：使用未初始化的内存，使用已经释放了的内存，内存访问越界等。这也是本文将重点介绍的部分，Valgrind 中包含的 Memcheck 工具可以检查以下的程序错误</span><br><span class="line">    1) 使用未初始化的内存 (Use of uninitialised memory)</span><br><span class="line">　　    2) 使用已经释放了的内存 (Reading/writing memory after it has been free’d)</span><br><span class="line">　　    3) 使用超过malloc分配的内存空间(Reading/writing off the end of malloc’d blocks)</span><br><span class="line">　　    4) 对堆栈的非法访问 (Reading/writing inappropriate areas on the stack)</span><br><span class="line">　　    5) 申请的空间是否有释放 (Memory leaks – where pointers to malloc’d blocks are lost forever)</span><br><span class="line">　　    6) malloc/free/new/delete申请和释放内存的匹配(Mismatched use of malloc/new/new [] vs free/delete/delete [])</span><br><span class="line">　　    7) src和dst的重叠(Overlapping src and dst pointers in memcpy() and related functions)</span><br><span class="line">　　    8) 重复free</span><br><span class="line"></span><br><span class="line">2. Callgrind</span><br><span class="line">它主要用来检查程序中函数调用过程中出现的问题</span><br><span class="line"></span><br><span class="line">3. Cachegrind</span><br><span class="line">它主要用来检查程序中缓存使用出现的问题</span><br><span class="line"></span><br><span class="line">4. Helgrind</span><br><span class="line">它主要用来检查多线程程序中出现的竞争问题</span><br><span class="line"></span><br><span class="line">5. Massif</span><br><span class="line">它主要用来检查程序中堆栈使用中出现的问题</span><br><span class="line"></span><br><span class="line">6. Extension</span><br><span class="line">可以利用core提供的功能，自己编写特定的内存调试工具</span><br></pre></td></tr></table></figure>
+<p>Memcheck检测内存问题的原理如下图所示</p>
+<p><img src="/images/process_struct_07.jpg" alt=""></p>
+<p>Memcheck 能够检测出内存问题，关键在于其建立了两个全局表</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1. Valid-Value表</span><br><span class="line">对于进程的整个地址空间中的每一个字节(byte)，都有与之对应的 8 个 bits；对于 CPU 的每个寄存器，也有一个与之对应的 bit 向量。这些 bits 负责记录该字节或者寄存器值是否具有有效的、已初始化的值 </span><br><span class="line">2. Valid-Address表</span><br><span class="line">对于进程整个地址空间中的每一个字节(byte)，还有与之对应的 1 个 bit，负责记录该地址是否能够被读写</span><br></pre></td></tr></table></figure>
+<p>检测原理</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. 当要读写内存中某个字节时，首先检查这个字节对应的 A bit(Valid-Adress Map)。如果该A bit显示该位置是无效位置，memcheck 则报告读写错误 </span><br><span class="line">2. 内核(core)类似于一个虚拟的 CPU 环境，这样当内存中的某个字节被加载到真实的 CPU 中时，该字节对应的 V bit(Valid-Value Map) 也被加载到虚拟的 CPU 环境中。一旦寄存器中的值，被用来产生内存地址，或者该值能够影响程序输出，则 memcheck 会检查对应的V bits，如果该值尚未初始化，则会报告使用未初始化内存错误</span><br></pre></td></tr></table></figure>
+<p><strong>*0x1: 编译安装*</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget http://valgrind.org/downloads/valgrind-3.4.1.tar.bz2</span><br><span class="line">tar xvf valgrind-3.4.1.tar.bz2</span><br><span class="line">cd valgrind-3.4.1/</span><br><span class="line">./configure --prefix/home/zhenghan.zh/valgrind</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<p><strong>*0x2: 检测使用*</strong></p>
+<p>为了使valgrind发现的错误更精确，如能够定位到源代码行，建议在编译时加上-g参数，编译优化选项请选择O0，虽然这会降低程序的执行效率</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void fun()</span><br><span class="line">&#123;</span><br><span class="line">    int *p = (int*)malloc(10 * sizeof(int));</span><br><span class="line">    //内存越界写入</span><br><span class="line">    p[10] = 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">int main(int argc, char* argv[])</span><br><span class="line">&#123;</span><br><span class="line">    fun();</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">//gcc –g –O0 sample.c –o sample</span><br></pre></td></tr></table></figure>
+<p>运行valgrind</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/home/zhenghan.zh/valgrind/bin/valgrind --tool=memcheck --leak-check=full /home/zhenghan.zh/memcheck/sample</span><br><span class="line">/home/zhenghan.zh/valgrind/bin/valgrind /home/zhenghan.zh/memcheck/sample</span><br></pre></td></tr></table></figure>
+<h4 id="5-2-3-使用heap-profiler检查内存泄露"><a href="#5-2-3-使用heap-profiler检查内存泄露" class="headerlink" title="5.2.3 使用heap profiler检查内存泄露"></a>5.2.3 使用heap profiler检查内存泄露</h4><p>heap profiler为google出品的用来监测内存的工具，可以用来进行内存泄漏的监测<br>使用方法：<br>（1）在makefile中链接libprofiler.a与libtcmalloc.a<br>（2）在程序代码中，希望开始监测的地方使用HeapProfilerStart(char *path)，参数为要输出的文件的名称前缀；在停止监测的地方使用HeapProfilerStop()，测试代码如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"google/heap-profiler.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test1</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">100</span>;</span><br><span class="line">    <span class="keyword">while</span>(i--) &#123;</span><br><span class="line">        <span class="keyword">char</span> *buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>*<span class="number">1024</span>];</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">test2</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">100</span>;</span><br><span class="line">    <span class="keyword">while</span>(i--) &#123;</span><br><span class="line">        <span class="keyword">char</span> *buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>*<span class="number">1024</span>];</span><br><span class="line">    &#125;   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    HeapProfilerStart(<span class="string">"./test.log"</span>);</span><br><span class="line">    <span class="keyword">int</span> i = <span class="number">100</span>;</span><br><span class="line">    <span class="keyword">while</span>(i--) &#123;</span><br><span class="line">        <span class="keyword">char</span> *buf = <span class="keyword">new</span> <span class="keyword">char</span>[<span class="number">1024</span>*<span class="number">1024</span>];                                                                                                                                    </span><br><span class="line">    &#125;   </span><br><span class="line">    test1();</span><br><span class="line">    test2();</span><br><span class="line">    HeapProfilerStop();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>测试用例中生成的heap文件名为test.log.0001.heap、test.log.0002.heap以此类推<br>（3）宏HEAP_PROFILE_ALLOCATION_INTERVAL指当一块大小为HEAP_PROFILE_ALLOCATION_INTERVAL的内存被申请出来，生成一个新的heap文件<br>（4）使用命令（pprof –text 可执行文件名 heap文件名）查看heap文件状态，其中包括每个函数的内存使用情况 </p>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>《深入理解计算机系统》<br>《深入Linux内核架构》<br>Linux虚拟地址空间布局 <a href="http://www.cnblogs.com/clover-toeic/p/3754433.html" target="_blank" rel="noopener">http://www.cnblogs.com/clover-toeic/p/3754433.html</a><br>进程地址空间和内存碎片 <a href="https://www.cnblogs.com/newjiang/p/9543695.html" target="_blank" rel="noopener">https://www.cnblogs.com/newjiang/p/9543695.html</a><br><a href="https://www.kernel.org/doc/Documentation/x86/x86_64/mm.txt" target="_blank" rel="noopener">https://www.kernel.org/doc/Documentation/x86/x86_64/mm.txt</a><br><a href="http://blog.sina.com.cn/s/blog_167a6a5150102x378.html" target="_blank" rel="noopener">http://blog.sina.com.cn/s/blog_167a6a5150102x378.html</a><br><a href="https://blog.csdn.net/ufolr/article/details/52833736" target="_blank" rel="noopener">https://blog.csdn.net/ufolr/article/details/52833736</a><br><a href="https://blog.csdn.net/freeelinux/article/details/53782986" target="_blank" rel="noopener">https://blog.csdn.net/freeelinux/article/details/53782986</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2018/10/08/linux/linux_process_memory_struct/" title="linux 进程的内存结构">https://leapking.github.io/2018/10/08/linux/linux_process_memory_struct/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"><i class="fa fa-tag"></i> linux</a>
+          
+            <a href="/tags/memory/" rel="tag"><i class="fa fa-tag"></i> memory</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/15/linux/linux_process_stack/" rel="next" title="linux 进程堆栈分析">
+                <i class="fa fa-chevron-left"></i> linux 进程堆栈分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/15/linux/linux_glibc_pthread/" rel="prev" title="linux pthread_kill段错误">
+                linux pthread_kill段错误 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">48</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-操作系统内存管理"><span class="nav-number">1.1.</span> <span class="nav-text">1 操作系统内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-进程的内存结构"><span class="nav-number">1.2.</span> <span class="nav-text">2 进程的内存结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-基本概念"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ELF文件结构"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.2 ELF文件结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-进程地址空间布局"><span class="nav-number">1.2.3.</span> <span class="nav-text">2.3 进程地址空间布局</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-内存段结构"><span class="nav-number">1.2.4.</span> <span class="nav-text">2.4 内存段结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-1-静态区域"><span class="nav-number">1.2.4.1.</span> <span class="nav-text">2.4.1 静态区域</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-1-1-代码段"><span class="nav-number">1.2.4.1.1.</span> <span class="nav-text">2.4.1.1 代码段</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-1-2-数据段"><span class="nav-number">1.2.4.1.2.</span> <span class="nav-text">2.4.1.2 数据段</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-2-动态区域"><span class="nav-number">1.2.4.2.</span> <span class="nav-text">2.4.2 动态区域</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-2-1-堆"><span class="nav-number">1.2.4.2.1.</span> <span class="nav-text">2.4.2.1 堆</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-2-2-文件映射区"><span class="nav-number">1.2.4.2.2.</span> <span class="nav-text">2.4.2.2 文件映射区</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-2-3-栈"><span class="nav-number">1.2.4.2.3.</span> <span class="nav-text">2.4.2.3 栈</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-3-内核映射区"><span class="nav-number">1.2.4.3.</span> <span class="nav-text">2.4.3 内核映射区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-4-进程内存虚拟地址信息"><span class="nav-number">1.2.4.4.</span> <span class="nav-text">2.4.4 进程内存虚拟地址信息</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-glibc对内存的分配和回收"><span class="nav-number">1.3.</span> <span class="nav-text">3 glibc对内存的分配和回收</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Malloc如何分配内存"><span class="nav-number">1.3.1.</span> <span class="nav-text">3.1 Malloc如何分配内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Malloc申请大小与分配大小"><span class="nav-number">1.3.2.</span> <span class="nav-text">3.2 Malloc申请大小与分配大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Free对内存的释放"><span class="nav-number">1.3.3.</span> <span class="nav-text">3.3 Free对内存的释放</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-内存监控"><span class="nav-number">1.4.</span> <span class="nav-text">4 内存监控</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-通过命令监控"><span class="nav-number">1.4.1.</span> <span class="nav-text">4.1 通过命令监控</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-应用程序内部监控"><span class="nav-number">1.4.2.</span> <span class="nav-text">4.2 应用程序内部监控</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-1-hook"><span class="nav-number">1.4.2.1.</span> <span class="nav-text">4.2.1 hook</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-2-wrap"><span class="nav-number">1.4.2.2.</span> <span class="nav-text">4.2.2 wrap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-3-vliage"><span class="nav-number">1.4.2.3.</span> <span class="nav-text">4.2.3 vliage</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-内存泄露"><span class="nav-number">1.5.</span> <span class="nav-text">5 内存泄露</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-内存碎片"><span class="nav-number">1.5.1.</span> <span class="nav-text">5.1 内存碎片</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-1-如何查看堆内内存的碎片情况"><span class="nav-number">1.5.1.1.</span> <span class="nav-text">5.1.1 如何查看堆内内存的碎片情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-1-2-如何避免内存碎片"><span class="nav-number">1.5.1.2.</span> <span class="nav-text">5.1.2 如何避免内存碎片</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-内存泄露"><span class="nav-number">1.5.2.</span> <span class="nav-text">5.2 内存泄露</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-1-内存泄露的发生方式"><span class="nav-number">1.5.2.1.</span> <span class="nav-text">5.2.1 内存泄露的发生方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-1-常用内存泄露检查工具"><span class="nav-number">1.5.2.2.</span> <span class="nav-text">5.2.1 常用内存泄露检查工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-2-使用Valgrind检查内存泄露"><span class="nav-number">1.5.2.3.</span> <span class="nav-text">5.2.2 使用Valgrind检查内存泄露</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-2-3-使用heap-profiler检查内存泄露"><span class="nav-number">1.5.2.4.</span> <span class="nav-text">5.2.3 使用heap profiler检查内存泄露</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.6.</span> <span class="nav-text">参考资料</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>
