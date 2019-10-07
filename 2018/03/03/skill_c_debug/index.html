@@ -106,7 +106,7 @@
 <meta property="og:site_name" content="LeapKing&#39;s Home">
 <meta property="og:description" content="C语言的一些调试技巧">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-04-27T14:33:31.054Z">
+<meta property="og:updated_time" content="2019-10-04T03:14:34.243Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="C语言的一些调试技巧">
 <meta name="twitter:description" content="C语言的一些调试技巧">
@@ -180,7 +180,7 @@
       </a>
     </div>
       
-        <h1 class="site-subtitle" itemprop="description"></h1>
+        <p class="site-subtitle"></p>
       
   </div>
 
@@ -333,7 +333,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">C语言的一些调试技巧</h2>
+          <h1 class="post-title" itemprop="name headline">C语言的一些调试技巧</h1>
         
 
         <div class="post-meta">
@@ -426,6 +426,7 @@
 <li>gdb调试时局部变量不可查看时，在编译是加入 ‘-gstabs+’选项<br>比如:<br>g++ -g -Wall -O0 -g3 -gstabs+ -o main.o main.cpp<br>或：<br>./configure … CFLAGS=’-O0 -g3 -gstabs+’</li>
 </ol>
 <h1 id="通过环境变量设置程序断点"><a href="#通过环境变量设置程序断点" class="headerlink" title="通过环境变量设置程序断点"></a>通过环境变量设置程序断点</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> *var = getenv(<span class="string">"DEBUG_FUNC"</span>);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(var, <span class="string">"main"</span>) == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">int</span> wait=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (wait)</span><br><span class="line">            sleep(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="输出信息到临时文件"><a href="#输出信息到临时文件" class="headerlink" title="输出信息到临时文件"></a>输出信息到临时文件</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#define OUTPUT(str) do &#123; \</span><br><span class="line">        FILE *fp = fopen(&quot;/tmp/debug_output.txt&quot;,&quot;a+&quot;); \</span><br><span class="line">        fputs((str), fp); \</span><br><span class="line">        fclose(fp); \</span><br><span class="line">&#125; while(0)</span><br><span class="line"></span><br><span class="line">void</span><br><span class="line">main()</span><br><span class="line">&#123;</span><br><span class="line">        OUTPUT(&quot;xxxxxxxx\n&quot;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="16进制输出内存地址"><a href="#16进制输出内存地址" class="headerlink" title="16进制输出内存地址"></a>16进制输出内存地址</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line"> * ShowHexData</span><br><span class="line"> *     Show raw data in hex format</span><br><span class="line"> * Args:</span><br><span class="line"> *    data[IN]  - data to print</span><br><span class="line"> *    len[IN]   - the length of data</span><br><span class="line"> */</span><br><span class="line">static void</span><br><span class="line">ShowHexData(char *data, int len)</span><br><span class="line">&#123;</span><br><span class="line">    int i, j, k, first_zero_line=0;</span><br><span class="line"></span><br><span class="line">    if (len &lt;= 0)</span><br><span class="line">    &#123;</span><br><span class="line">        printf(&quot;null\n&quot;);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    for (i = 0; i &lt; len; i+=16)</span><br><span class="line">    &#123;</span><br><span class="line">        if (*(int32 *)(data+i) == 0 &amp;&amp; *(int32 *)(data+i+4) == 0 &amp;&amp; *(int32 *)(data+i+8) == 0 &amp;&amp; *(int32 *)(data+i+12) == 0)</span><br><span class="line">        &#123;</span><br><span class="line">            if (!first_zero_line++)</span><br><span class="line">                printf(&quot;*\n&quot;);</span><br><span class="line">            continue;</span><br><span class="line">        &#125;else</span><br><span class="line">            first_zero_line=0;</span><br><span class="line"></span><br><span class="line">        if (len &gt;16)</span><br><span class="line">            printf(&quot;%08x: &quot;, i);</span><br><span class="line"></span><br><span class="line">        /* print data in hex type */</span><br><span class="line">        for (j = i, k = 0; k &lt; 16; k++, j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (k &amp;&amp; k % 8 == 0)</span><br><span class="line">                printf(&quot; &quot;);</span><br><span class="line">            if (j &lt; len)</span><br><span class="line">                printf(&quot;%02x &quot;, data[j]);</span><br><span class="line">            else</span><br><span class="line">                printf(&quot;   &quot;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        /* print data in text type */</span><br><span class="line">        printf(&quot;\t|&quot;);</span><br><span class="line">        for (j = i, k = 0; k &lt; 16; k++, j++)</span><br><span class="line">        &#123;</span><br><span class="line">            if (k &amp;&amp; k % 8 == 0)</span><br><span class="line">                printf(&quot; &quot;);</span><br><span class="line">            if (j &lt; len)</span><br><span class="line">            &#123;</span><br><span class="line">                if (!isprint(data[j]) || (data[j] == &apos;\t&apos;))</span><br><span class="line">                    printf(&quot;.&quot;);</span><br><span class="line">                else</span><br><span class="line">                    printf(&quot;%c&quot;, data[j]);</span><br><span class="line">            &#125;</span><br><span class="line">            else</span><br><span class="line">                printf(&quot; &quot;);</span><br><span class="line">        &#125;</span><br><span class="line">        printf(&quot;|\n&quot;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="统计内存分配释放"><a href="#统计内存分配释放" class="headerlink" title="统计内存分配释放"></a>统计内存分配释放</h1><p><a href="http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html?spm=a2c4e.11153940.blogcont26650.5.13817d9ecLlFcU" target="_blank" rel="noopener">http://www.gnu.org/software/libc/manual/html_node/Hooks-for-Malloc.html?spm=a2c4e.11153940.blogcont26650.5.13817d9ecLlFcU</a><br><a href="https://github.com/leapking/sys_tools/blob/master/mtrace_hook.c" target="_blank" rel="noopener">https://github.com/leapking/sys_tools/blob/master/mtrace_hook.c</a><br><a href="https://github.com/leapking/sys_tools/blob/master/mtrace_wrap.c" target="_blank" rel="noopener">https://github.com/leapking/sys_tools/blob/master/mtrace_wrap.c</a></p>
 
@@ -561,7 +562,11 @@
                 alt="Leap King" />
             
               <p class="site-author-name" itemprop="name">Leap King</p>
-              <p class="site-description motion-element" itemprop="description"></p>
+              <p class="site-description motion-element" itemprop="description">
+            
+              一旦你决定好职业，你必须全心投入工作之中，你必须爱自己的工作，千万不要有怨言，你必须穷尽一生磨炼技能，这就是成功的秘诀，也是让人家敬重的关键。
+            
+            </p>
           </div>
 
           <nav class="site-state motion-element">
@@ -571,7 +576,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">50</span>
+                  <span class="site-state-item-count">57</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -593,7 +598,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-count">47</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -620,9 +625,21 @@
                   </span>
                 
                   <span class="links-of-author-item">
+                    <a href="https://leapbook.readthedocs.io" target="_blank" title="ReadtheDocs">
+                      
+                        <i class="fa fa-fw fa-book"></i>ReadtheDocs</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
                     <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
                       
-                        <i class="fa fa-fw fa-126"></i>E-Mail</a>
+                        <i class="fa fa-fw fa-mail-forward"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/12068763/leapking" target="_blank" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
                   </span>
                 
             </div>
@@ -649,7 +666,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编译"><span class="nav-number">1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通过环境变量设置程序断点"><span class="nav-number">2.</span> <span class="nav-text">通过环境变量设置程序断点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16进制输出内存地址"><span class="nav-number">3.</span> <span class="nav-text">16进制输出内存地址</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#统计内存分配释放"><span class="nav-number">4.</span> <span class="nav-text">统计内存分配释放</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编译"><span class="nav-number">1.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通过环境变量设置程序断点"><span class="nav-number">2.</span> <span class="nav-text">通过环境变量设置程序断点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#输出信息到临时文件"><span class="nav-number">3.</span> <span class="nav-text">输出信息到临时文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16进制输出内存地址"><span class="nav-number">4.</span> <span class="nav-text">16进制输出内存地址</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#统计内存分配释放"><span class="nav-number">5.</span> <span class="nav-text">统计内存分配释放</span></a></li></ol></div>
             
 
           </div>

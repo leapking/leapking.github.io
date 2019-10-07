@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+<script>
+    (function(){
+        if(''){
+            if (prompt('请输入文章密码') !== ''){
+                alert('密码错误！');
+                history.back();
+            }
+        }
+    })();
+</script>
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="raspberrypi," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="LeapKing's Home" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="树梅派蓝牙开发">
+<meta name="keywords" content="raspberrypi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="树梅派蓝牙开发">
+<meta property="og:url" content="https://leapking.github.io/2019/05/18/tools_raspberrypi_bluetooth/index.html">
+<meta property="og:site_name" content="LeapKing&#39;s Home">
+<meta property="og:description" content="树梅派蓝牙开发">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-10-04T03:14:34.247Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="树梅派蓝牙开发">
+<meta name="twitter:description" content="树梅派蓝牙开发">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://leapking.github.io/2019/05/18/tools_raspberrypi_bluetooth/"/>
+
+
+
+
+
+  <title>树梅派蓝牙开发 | LeapKing's Home</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">LeapKing's Home</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://leapking.github.io/2019/05/18/tools_raspberrypi_bluetooth/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Leap King">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="LeapKing's Home">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">树梅派蓝牙开发</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-05-18T20:46:08+08:00">
+                2019-05-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/tools/" itemprop="url" rel="index">
+                    <span itemprop="name">tools</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  树梅派蓝牙开发
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="启动蓝牙设备"><a href="#启动蓝牙设备" class="headerlink" title="启动蓝牙设备"></a>启动蓝牙设备</h2><h2 id="检查蓝牙协议版本"><a href="#检查蓝牙协议版本" class="headerlink" title="检查蓝牙协议版本"></a>检查蓝牙协议版本</h2><p>BlueZ是Linux官方的蓝牙协议栈。我们可以通过BlueZ提供的接口，进行丰富的蓝牙操作。查看Raspbian中BlueZ版本。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">leap@raspberrypi:~ $ bluetoothd -v</span><br><span class="line">5.43</span><br></pre></td></tr></table></figure>
+<p>低版本的BlueZ对低功耗蓝牙（早期蓝牙耗电较高，诺基亚改良了低功耗的蓝牙协议）的支持有限。如果你的使用版本低于5.43，先升级BlueZ。</p>
+<h3 id="配置pulseaudio"><a href="#配置pulseaudio" class="headerlink" title="配置pulseaudio"></a>配置pulseaudio</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update &amp;&amp; sudo apt-get upgrade -y #更新系统</span><br><span class="line">sudo apt-get install pulseaudio-module-bluetooth -y #安装pulseaudio</span><br><span class="line">sudo nano /etc/pulse/daemon.conf #修改pulseaudio的空闲退出时间</span><br><span class="line">exit-idle-time = -1</span><br><span class="line">pulseaudio --start #开户pulseaudio</span><br><span class="line">pulseaudio -v #查看日志</span><br></pre></td></tr></table></figure>
+<h3 id="启动蓝牙设备-1"><a href="#启动蓝牙设备-1" class="headerlink" title="启动蓝牙设备"></a>启动蓝牙设备</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl status bluetooth #查看设备状态</span><br><span class="line">sudo systemctl start bluetooth  #启动设备</span><br><span class="line">sudo systemctl enable bluetooth #将将蓝牙服务加入开机启动</span><br><span class="line"></span><br><span class="line">leap@raspberrypi:~ $ systemctl status bluetooth</span><br><span class="line">● bluetooth.service - Bluetooth service</span><br><span class="line">   Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Tue 2019-05-21 22:59:57 CST; 25min ago</span><br><span class="line">     Docs: man:bluetoothd(8)</span><br><span class="line"> Main PID: 2158 (bluetoothd)</span><br><span class="line">   Status: "Running"</span><br><span class="line">   CGroup: /system.slice/bluetooth.service</span><br><span class="line">           └─2158 /usr/lib/bluetooth/bluetoothd</span><br><span class="line"></span><br><span class="line">leap@raspberrypi:work $ sudo hciconfig hci0 up</span><br><span class="line">leap@raspberrypi:work $ sudo hciconfig list</span><br><span class="line">hci0:	Type: Primary  Bus: UART</span><br><span class="line">	BD Address: B8:27:EB:2C:69:05  ACL MTU: 1021:8  SCO MTU: 64:1</span><br><span class="line">	UP RUNNING </span><br><span class="line">	RX bytes:56192 acl:314 sco:0 events:5039 errors:0</span><br><span class="line">	TX bytes:3590869 acl:6094 sco:0 commands:1786 errors:0</span><br></pre></td></tr></table></figure>
+<h3 id="操控蓝牙设备"><a href="#操控蓝牙设备" class="headerlink" title="操控蓝牙设备"></a>操控蓝牙设备</h3><p>在Raspbian中，基本的蓝牙操作可以通过bluez提供的bluetoothctl命令进行。命令运行后将开启一个新的命令行环境。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">leap@raspberrypi:~ $ bluetoothctl </span><br><span class="line">[NEW] Controller B8:27:EB:2C:69:05 raspberrypi [default]</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> list #显示树莓派上可用的蓝牙模块</span><br><span class="line">Controller B8:27:EB:2C:69:05 raspberrypi [default]</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> power on</span><br><span class="line">Changing power on succeeded</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> agent on</span><br><span class="line">Agent registered</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> default-agent </span><br><span class="line">Default agent request successful</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> scan on　＃扫描可链接的蓝牙设备</span><br><span class="line">Discovery started</span><br><span class="line">[CHG] Controller B8:27:EB:2C:69:05 Discovering: yes</span><br><span class="line">[NEW] Device 20:B1:78:19:E8:88 BL-T12</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> devices  #扫描到蓝牙设备的MAC地址和名称</span><br><span class="line">Device 20:B1:78:19:E8:88 BL-T12</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> pair 20:B1:78:19:E8:88 #与设备进行配对</span><br><span class="line">Attempting to pair with 20:B1:78:19:E8:88</span><br><span class="line">Pairing successful</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> trust 20:B1:78:19:E8:88　#信任选中的蓝牙设备</span><br><span class="line">Changing 20:B1:78:19:E8:88 trust succeeded</span><br><span class="line"></span><br><span class="line"><span class="meta">[bluetooth]#</span> connect 20:B1:78:19:E8:88 #链接蓝牙设备</span><br><span class="line">Attempting to connect to 20:B1:78:19:E8:88</span><br><span class="line">Connection successful</span><br><span class="line"></span><br><span class="line">help #获得帮助命令</span><br><span class="line">exit #退出命令行环境</span><br></pre></td></tr></table></figure>
+<p>FAQ：<br>[bluetooth]# scan on<br>Failed to start discovery: org.bluez.Error.NotReady</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">leap@raspberrypi:Desktop $ sudo systemctl status bluetooth</span><br><span class="line">● bluetooth.service - Bluetooth service</span><br><span class="line">  Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)</span><br><span class="line">  Active: active (running) since Wed 2019-05-22 07:17:08 CST; 17h ago</span><br><span class="line">    Docs: man:bluetoothd(8)</span><br><span class="line">Main PID: 519 (bluetoothd)</span><br><span class="line">  Status: "Running"</span><br><span class="line">  CGroup: /system.slice/bluetooth.service</span><br><span class="line">          └─519 /usr/lib/bluetooth/bluetoothd</span><br><span class="line"></span><br><span class="line">May 22 22:52:39 raspberrypi bluetoothd[519]: RFCOMM server failed for Headset Voice gateway: rfcomm_bind: Address already in u</span><br><span class="line">May 23 00:03:46 raspberrypi bluetoothd[519]: Failed to set mode: Blocked through rfkill (0x12)</span><br><span class="line">May 23 00:04:06 raspberrypi bluetoothd[519]: Failed to set mode: Blocked through rfkill (0x12)</span><br><span class="line">May 23 00:07:05 raspberrypi bluetoothd[519]: Failed to set mode: Blocked through rfkill (0x12)</span><br><span class="line">May 23 00:07:13 raspberrypi bluetoothd[519]: Failed to set mode: Blocked through rfkill (0x12)</span><br><span class="line">May 23 00:14:11 raspberrypi bluetoothd[519]: Endpoint unregistered: sender=:1.25 path=/MediaEndpoint/A2DPSource</span><br><span class="line">May 23 00:14:11 raspberrypi bluetoothd[519]: Endpoint unregistered: sender=:1.25 path=/MediaEndpoint/A2DPSink</span><br><span class="line">May 23 00:14:16 raspberrypi bluetoothd[519]: Endpoint registered: sender=:1.41 path=/MediaEndpoint/A2DPSource</span><br><span class="line">May 23 00:14:16 raspberrypi bluetoothd[519]: Endpoint registered: sender=:1.41 path=/MediaEndpoint/A2DPSink</span><br><span class="line">May 23 00:14:16 raspberrypi bluetoothd[519]: RFCOMM server failed for Headset Voice gateway: rfcomm_bind: Address already in u</span><br></pre></td></tr></table></figure>
+<p>方法一：</p>
+<p>看蓝牙状态中有rfkill报错。RFKill 是Linux内核中的一个子系统，它可提供一个接口，在此接口中可查询、激活并取消激活计算机系统中的无线电传输。<br>当取消激活传输时，可使其处于可被软件重新激活的状态（ 软锁定 ）或软件无法重新激活的位置（ 硬锁定 ）。</p>
+<p>使用命令 rfkill list 获得设备列表，每个都包含与之关联的索引号 ，从 0 开始。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">leap@raspberrypi:~ $ rfkill unblock all</span><br><span class="line">leap@raspberrypi:~ $ rfkill list</span><br><span class="line">0: phy0: Wireless LAN</span><br><span class="line">  Soft blocked: no</span><br><span class="line">  Hard blocked: no</span><br><span class="line">1: hci0: Bluetooth</span><br><span class="line">  Soft blocked: no</span><br><span class="line">  Hard blocked: no</span><br></pre></td></tr></table></figure>
+<p>方法二：</p>
+<p>除了bluetoothctl，在Raspbian是shell中可以通过hciconfig来控制蓝牙模块。比如开关蓝牙模块：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo hciconfig hci0 up   #启动hci设备</span><br><span class="line">sudo hciconfig hci0 down #关闭hci设备</span><br><span class="line">leap@raspberrypi:work $ hcitool scan</span><br><span class="line">Scanning ...</span><br><span class="line">	20:B1:78:19:E8:88	BL-T12</span><br></pre></td></tr></table></figure>
+<p>命令中的hci0指的是0号HCI设备，即树莓派的蓝牙适配器。 </p>
+<p><a href="https://www.cnblogs.com/vamei/p/6753531.html" target="_blank" rel="noopener">https://www.cnblogs.com/vamei/p/6753531.html</a></p>
+<h3 id="设置系统默认发音设备"><a href="#设置系统默认发音设备" class="headerlink" title="设置系统默认发音设备"></a>设置系统默认发音设备</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pacmd list-sinks #显示可用发音设备</span><br><span class="line">pacmd set-default-sink bluez_sink.XX:XX:XX:XX:XX:XX #设置默认发音设备</span><br></pre></td></tr></table></figure>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget http://youness.net/wp-content/uploads/2016/08/h2g2.ogg</span><br><span class="line">paplay h2g2.ogg</span><br></pre></td></tr></table></figure>
+<h2 id="蓝牙开发"><a href="#蓝牙开发" class="headerlink" title="蓝牙开发"></a>蓝牙开发</h2><p>查找蓝牙设备示例代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sudo apt-get install mplayer</span></span><br><span class="line"><span class="comment"># sudo apt-get install libbluetooth-dev</span></span><br><span class="line"><span class="comment"># sudo pip install pybluez</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> bluetooth</span><br><span class="line"></span><br><span class="line">print(<span class="string">"performing inquiry..."</span>)</span><br><span class="line">devices = bluetooth.discover_devices(lookup_names = <span class="keyword">True</span>)</span><br><span class="line"></span><br><span class="line">print(<span class="string">"found %d devices"</span> % len(devices))</span><br><span class="line"><span class="keyword">for</span> addr, name <span class="keyword">in</span> devices:</span><br><span class="line">    print(<span class="string">"  %s - %s"</span> % (addr, name))</span><br></pre></td></tr></table></figure>
+<h2 id="利用系统内置语音引擎实现发音"><a href="#利用系统内置语音引擎实现发音" class="headerlink" title="利用系统内置语音引擎实现发音"></a>利用系统内置语音引擎实现发音</h2><p>Pyttsx是一个跨平台将文字转成语音的第三方库，它对操作系统内置的语音引擎实现了包装。</p>
+<p>pyttsx默认使用的是读取英文引擎，如果需要读取中文时需要修改语言设置，不然可能会报错或者无法发音，首先我们需要参考系统支持的语言类型和参数，通过以下代码可以查看</p>
+<p>测试代码</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#!/usr/bin/python</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sudo apt-get install libespeak1</span></span><br><span class="line"><span class="comment"># pip install pyttsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> pyttsx</span><br><span class="line"></span><br><span class="line">engine = pyttsx.init()</span><br><span class="line">engine.say(<span class="string">"Hello world!"</span>)</span><br><span class="line">engine.runAndWait()</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    Leap King
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://leapking.github.io/2019/05/18/tools_raspberrypi_bluetooth/" title="树梅派蓝牙开发">https://leapking.github.io/2019/05/18/tools_raspberrypi_bluetooth/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/raspberrypi/" rel="tag"><i class="fa fa-tag"></i> raspberrypi</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/27/database/database_postgresql_xlog1/" rel="next" title="PostgreSQL流复制一——集群搭建">
+                <i class="fa fa-chevron-left"></i> PostgreSQL流复制一——集群搭建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/01/skill_python_pyqt_1/" rel="prev" title="pyqtdemo 01 —— python图形开发">
+                pyqtdemo 01 —— python图形开发 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.png"
+                alt="Leap King" />
+            
+              <p class="site-author-name" itemprop="name">Leap King</p>
+              <p class="site-description motion-element" itemprop="description">
+            
+              一旦你决定好职业，你必须全心投入工作之中，你必须爱自己的工作，千万不要有怨言，你必须穷尽一生磨炼技能，这就是成功的秘诀，也是让人家敬重的关键。
+            
+            </p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">57</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">47</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/leapking" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://leapbook.readthedocs.io" target="_blank" title="ReadtheDocs">
+                      
+                        <i class="fa fa-fw fa-book"></i>ReadtheDocs</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:leapking@126.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-mail-forward"></i>E-Mail</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://stackoverflow.com/users/12068763/leapking" target="_blank" title="StackOverflow">
+                      
+                        <i class="fa fa-fw fa-stack-overflow"></i>StackOverflow</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#启动蓝牙设备"><span class="nav-number">1.</span> <span class="nav-text">启动蓝牙设备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查蓝牙协议版本"><span class="nav-number">2.</span> <span class="nav-text">检查蓝牙协议版本</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置pulseaudio"><span class="nav-number">2.1.</span> <span class="nav-text">配置pulseaudio</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动蓝牙设备-1"><span class="nav-number">2.2.</span> <span class="nav-text">启动蓝牙设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#操控蓝牙设备"><span class="nav-number">2.3.</span> <span class="nav-text">操控蓝牙设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设置系统默认发音设备"><span class="nav-number">2.4.</span> <span class="nav-text">设置系统默认发音设备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#测试"><span class="nav-number">2.5.</span> <span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#蓝牙开发"><span class="nav-number">3.</span> <span class="nav-text">蓝牙开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#利用系统内置语音引擎实现发音"><span class="nav-number">4.</span> <span class="nav-text">利用系统内置语音引擎实现发音</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Leap King</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+<!-- GoStats JavaScript Based Code -->
+<script type="text/javascript" src="http://gostats.cn/js/counter.js"></script>
+<script type="text/javascript">_gos='monster.gostats.cn';_goa=500128;
+_got=5;_goi=1;_gol='qq空间计数器';_GoStatsRun();</script>
+<noscript><a target="_blank" title="qq空间计数器" 
+href="http://gostats.cn"><img alt="qq空间计数器" 
+src="http://monster.gostats.cn/bin/count/a_500128/t_5/i_1/counter.png" 
+style="border-width:0" /></a></noscript>
+<!-- End GoStats JavaScript Based Code -->
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.4"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+
+  
+</body>
+</html>
